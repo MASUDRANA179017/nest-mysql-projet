@@ -22,6 +22,8 @@ import { BrandModule } from './brand/brand.module';
 import { WeightUnitModule } from './weight-unit/weight-unit.module';
 import { Brand } from "./entity/brand.entity";
 import { WeightUnit } from "./entity/weight-unit.entity";
+import { PrescriptionModule } from './prescription/prescription.module';
+import { Prescription } from "./entity/prescription.entity";
 
 @Module({
   imports: [
@@ -32,7 +34,7 @@ import { WeightUnit } from "./entity/weight-unit.entity";
       username: "root",
       password: "",
       database: "qbit_ecommerce",
-      entities: [User, Product,Store,Brand, WeightUnit, Review, Category, Coupon, Order, OrderItem],
+      entities: [User, Product,Store,Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem],
       synchronize: true,
     }),
     AuthModule,
@@ -45,6 +47,7 @@ import { WeightUnit } from "./entity/weight-unit.entity";
     CheckoutModule,
     BrandModule,
     WeightUnitModule,
+    PrescriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

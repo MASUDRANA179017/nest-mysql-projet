@@ -15,5 +15,5 @@ export class WeightUnit {
     description?: string;
 
     @OneToMany(() => Product, (product) => product.weightUnit)
-    products: Product[];
+    product: Product[];
 }

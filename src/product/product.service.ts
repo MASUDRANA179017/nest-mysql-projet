@@ -1,3 +1,4 @@
+import { WeightUnit } from 'src/entity/weight-unit.entity';
 import { ImageService } from './../image/image.service';
 import { User } from 'src/entity/user.entity';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
@@ -8,7 +9,7 @@ import { CreateProductDto } from './dto/crate-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Store } from 'src/entity/store.entity';
 import { Category } from 'src/entity/category.entity';
-import { NotFoundError } from 'rxjs';
+
 
 @Injectable()
 export class ProductService {
@@ -20,6 +21,8 @@ export class ProductService {
         private userRepository: Repository<User>,
         @InjectRepository(Store)
         private storeRepository: Repository<Store>,
+        @InjectRepository(WeightUnit)
+        private weightUnitRepository: Repository<WeightUnit>,
         @InjectRepository(Category)
         private categoryRepository: Repository<Category>,
     ) { }
@@ -33,6 +36,11 @@ export class ProductService {
         const store = await this.storeRepository.findOne({ where: { id: storeId }, relations: ['owner'] });
         if (!store) {
             throw new NotFoundException(`Store with ID ${storeId} not found`);
+        }
+
+        const weightUnit = await this.weightUnitRepository.findOne({ where: { id: productData.weightUnitId } });
+        if (!weightUnit) {
+            throw new NotFoundException(`Weight Unit with ID ${productData.weightUnitId} not found`);
         }
 
         // Allow admin or store owner
@@ -56,6 +64,7 @@ export class ProductService {
                 ...productData,
                 vendor: user,
                 store,
+                weightUnit,
                 category,
             }
         );
@@ -67,7 +76,7 @@ export class ProductService {
 
         // all products
         return this.productRepository.find({
-            relations: ['vendor', 'store', 'category', 'reviews'],
+            relations: ['vendor', 'store', 'weightUnit' ,'category', 'reviews'],
         });
 
     }

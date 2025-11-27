@@ -20,14 +20,14 @@ export class WeightUnitService {
 
     async getAll(): Promise<WeightUnit[]> {
         return this.weightUnitRepository.find({
-            relations: ['products'],
+            relations: ['product'],
         });
     }
 
     async getById(id: number): Promise<WeightUnit> {
         const unit = await this.weightUnitRepository.findOne({
             where: { id },
-            relations: ['products'],
+            relations: ['product'],
         });
 
         if (!unit) {
@@ -42,7 +42,7 @@ export class WeightUnitService {
 
         const updated = await this.weightUnitRepository.findOne({
             where: { id },
-            relations: ['products'],
+            relations: ['product'],
         });
 
         if (!updated) {

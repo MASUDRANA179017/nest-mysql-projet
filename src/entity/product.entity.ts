@@ -1,3 +1,4 @@
+
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm";
 import { User } from "./user.entity";
 import { Store } from "./store.entity";
@@ -5,6 +6,7 @@ import { Review } from "./review.entity";
 import { Category } from "./category.entity";
 import { Brand } from "./brand.entity";
 import { WeightUnit } from "./weight-unit.entity";
+import { Prescription } from "./prescription.entity";
 
 @Entity()
 export class Product {
@@ -42,7 +44,7 @@ export class Product {
     @ManyToOne(() => Store, (store) => store.id)
     store: Store;
     
-    @ManyToOne(() => WeightUnit, (weightUnit) => weightUnit.products)
+    @ManyToOne(() => WeightUnit, (weightUnit) => weightUnit.product)
     weightUnit: WeightUnit;
 
     @ManyToOne(() => Category, (category) => category.product)
@@ -50,8 +52,12 @@ export class Product {
     
     @ManyToOne(() => Brand, (brand) => brand.product)
     brand: Brand;
+
+    @ManyToOne(() => Prescription, (prescription) => prescription.products)
+    prescription: Prescription[];
     
     @OneToMany(() => Review, (review) => review.product)
     reviews: Review[];
+
 
 }
