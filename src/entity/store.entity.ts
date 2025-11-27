@@ -1,6 +1,8 @@
+
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Coupon } from "./coupon.entity";
+import { Prescription } from "./prescription.entity";
 
 @Entity()
 export class Store {
@@ -18,6 +20,9 @@ export class Store {
 
     @ManyToOne(() => User, (user) => user.stores)
     owner: User;
+
+    @OneToMany(() => Prescription, (prescriptions) => prescriptions.store)
+    prescriptions: Prescription[];
 
     @CreateDateColumn()
     createdAt: Date;

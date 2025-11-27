@@ -6,12 +6,16 @@ import { User } from 'src/entity/user.entity';
 import { Product } from 'src/entity/product.entity';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { UpdatePrescriptionDto } from './dto/update-prescription.dto';
+import { Store } from 'src/entity/store.entity';
 
 @Injectable()
 export class PrescriptionService {
     constructor(
         @InjectRepository(Prescription)
         private prescriptionRepository: Repository<Prescription>,
+
+        @InjectRepository(Store)
+        private storeRepository: Repository<Store>,
 
         @InjectRepository(User)
         private userRepository: Repository<User>,
@@ -25,6 +29,13 @@ export class PrescriptionService {
         const user = await this.userRepository.findOneBy({ id: userId });
         if (!user) {
             throw new ForbiddenException(`User with id ${userId} not found`);
+        }
+
+        // Find store
+        const store = await this.storeRepository.findOne({ where: { owner: { id: userId } } })
+
+        if (!store) {
+            throw new ForbiddenException("Store not found or You are not the owner")
         }
         // Find owner
         const owner = await this.userRepository.findOne({
@@ -45,6 +56,7 @@ export class PrescriptionService {
         // Create prescription
         const prescription = this.prescriptionRepository.create({
             ...prescriptionDto,
+            store,
             owner,
             products,
         });
@@ -53,17 +65,40 @@ export class PrescriptionService {
      }
 
     // GET ALL -----------------------------------------------------
-    async getAll(): Promise<Prescription[]> {
+   async getAll(userId: number): Promise<Prescription[]> {
+        // Ensure user exists
+        const user = await this.userRepository.findOne({
+            where: { id: userId }
+        });
+
+        if (!user) {
+            throw new ForbiddenException(`User with id ${userId} not found`);
+        }
+
+        // Find store owned by this user
+        const store = await this.storeRepository.findOne({
+            where: { owner: { id: userId } }
+        });
+
+        if (!store) {
+            throw new ForbiddenException("Store not found or you are not the owner");
+        }
+
+        // Return prescriptions belonging to this store
         return this.prescriptionRepository.find({
-            relations: ['owner', 'products'],
+            where: { store: { id: store.id } },
+            relations: ['owner', 'products', 'store'],
+            order: { id: 'DESC' },
         });
     }
+
+
 
     // GET ONE -----------------------------------------------------
     async getById(id: number): Promise<Prescription> {
         const prescription = await this.prescriptionRepository.findOne({
             where: { id },
-            relations: ['owner', 'products'],
+            relations: ['owner', 'products', 'store'],
         });
 
         if (!prescription) throw new ForbiddenException(`Prescription with id ${id} not found`);
@@ -74,10 +109,17 @@ export class PrescriptionService {
     async update(id: number, dto: UpdatePrescriptionDto): Promise<Prescription> {
         const prescription = await this.prescriptionRepository.findOne({
             where: { id },
-            relations: ['products'],
+             relations: ['products', 'owner', 'store'],
         });
 
         if (!prescription) throw new ForbiddenException(`Prescription with id ${id} not found`);
+
+        // Update store
+        if (dto.storeId) {
+            const store = await this.storeRepository.findOneBy({ id: dto.storeId });
+            if (!store) throw new ForbiddenException(`Store with id ${dto.storeId} not found`);
+            prescription.store = store;
+        }
 
         // Update owner
         if (dto.ownerId) {
@@ -91,14 +133,12 @@ export class PrescriptionService {
             const products = await this.productRepository.find({
                 where: { id: In(dto.productIds) },
             });
-            prescription.products = products; // ✅ corrected
+            prescription.products = products; 
         }
 
         // Update dates
         if (dto.visitingDate) prescription.visitingDate = new Date(dto.visitingDate);
         if (dto.nextVisitingDate) prescription.nextVisitingDate = new Date(dto.nextVisitingDate);
-
-        Object.assign(prescription, dto);
 
         return this.prescriptionRepository.save(prescription);
     }

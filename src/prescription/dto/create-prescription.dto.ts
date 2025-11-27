@@ -32,6 +32,11 @@ export class CreatePrescriptionDto {
     @IsOptional()
     nextVisitingDate?: string;
 
+    @ApiProperty({ description: "Store ID of the vendor", example: 1 })
+    @IsNotEmpty()
+    @IsNumber()
+    storeId: number;
+
     @ApiProperty({ description: 'Owner User ID', example: 1, required: false })
     @IsNumber()
     @IsOptional()

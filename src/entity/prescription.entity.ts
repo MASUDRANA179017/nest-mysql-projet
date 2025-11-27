@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
 import { User } from './user.entity';
 import { Product } from './product.entity';
+import { Store } from './store.entity';
 
 @Entity()
 export class Prescription {
@@ -24,6 +25,9 @@ export class Prescription {
 
     @Column({ nullable: true, type: 'datetime' })
     nextVisitingDate: Date;
+
+    @ManyToOne(() => Store, (store) => store.prescriptions)
+    store: Store;
 
     @ManyToOne(() => User, (user) => user.prescription)
     owner: User;

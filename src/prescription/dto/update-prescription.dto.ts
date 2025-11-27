@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber, IsDateString, IsArray, ArrayNotEmpty } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDateString, IsArray, ArrayNotEmpty, IsNotEmpty } from 'class-validator';
 
 export class UpdatePrescriptionDto {
     @ApiProperty({ description: 'Title', example: 'Evening Medicine', required: false })
@@ -31,6 +31,11 @@ export class UpdatePrescriptionDto {
     @IsDateString()
     @IsOptional()
     nextVisitingDate?: string;
+
+    @ApiProperty({ description: "Store ID of the vendor", example: 1 })
+    @IsNotEmpty()
+    @IsNumber()
+    storeId: number;
 
     @ApiProperty({ description: 'Owner User ID', example: 1, required: false })
     @IsNumber()

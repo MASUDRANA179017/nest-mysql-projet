@@ -26,9 +26,13 @@ export class PrescriptionController {
     }
 
     @Get('/all')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Get all prescriptions' })
-    async getAll() {
-        return this.prescriptionService.getAll();
+    @ApiResponse({ status: 200, description: 'Prescriptions retrieved successfully' })
+    @ApiResponse({ status: 403, description: 'Forbidden' })
+    async getAll(@Request() req: any) {
+        return this.prescriptionService.getAll(req.user.id);
     }
 
     @Get('/:id')
