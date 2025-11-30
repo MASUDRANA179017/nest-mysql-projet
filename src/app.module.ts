@@ -28,12 +28,12 @@ import { Prescription } from "./entity/prescription.entity";
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: "mysql",
-      host: "localhost",
+      type: "postgres",
+      host: "9qasp5v56q8ckkf5dc.leapcellpool.com:6438",
       port: 3306,
-      username: "root",
-      password: "",
-      database: "qbit_ecommerce",
+      username: "frvoxctukhrcvdltrwhb",
+      password: "hedqqbfboiewaisqjqeneuqwskseoh",
+      database: "xugntwksjhpepkvutfaf",
       entities: [User, Product,Store,Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem],
       synchronize: true,
     }),
