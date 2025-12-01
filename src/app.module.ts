@@ -29,6 +29,7 @@ import { Invoice } from "./entity/invoice.entity";
 import { PosModule } from './pos/pos.module';
 import { PosSession } from "./entity/pos-session.entity";
 import { PosTransaction } from "./entity/pos-transaction.entity";
+import { BarcodeModule } from './barcode/barcode.module';
 
 @Module({
   imports: [
