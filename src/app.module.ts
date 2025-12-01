@@ -26,6 +26,9 @@ import { PrescriptionModule } from './prescription/prescription.module';
 import { Prescription } from "./entity/prescription.entity";
 import { InvoiceModule } from './invoice/invoice.module';
 import { Invoice } from "./entity/invoice.entity";
+import { PosModule } from './pos/pos.module';
+import { PosSession } from "./entity/pos-session.entity";
+import { PosTransaction } from "./entity/pos-transaction.entity";
 
 @Module({
   imports: [
@@ -36,7 +39,7 @@ import { Invoice } from "./entity/invoice.entity";
       username: "root",
       password: "",
       database: "qbit_ecommerce",
-      entities: [User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice],
+      entities: [User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction],
       synchronize: true,
     }),
     AuthModule,
@@ -51,6 +54,7 @@ import { Invoice } from "./entity/invoice.entity";
     WeightUnitModule,
     PrescriptionModule,
     InvoiceModule,
+    PosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
