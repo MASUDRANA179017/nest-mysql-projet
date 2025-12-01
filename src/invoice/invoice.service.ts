@@ -53,12 +53,13 @@ export class InvoiceService {
         }
 
         // Find order if provided
-        let order = null;
+        let order: Order | undefined = undefined;
         if (dto.orderId) {
-            order = await this.orderRepository.findOneBy({ id: dto.orderId });
-            if (!order) {
+            const foundOrder = await this.orderRepository.findOneBy({ id: dto.orderId });
+            if (!foundOrder) {
                 throw new ForbiddenException('Order not found');
             }
+            order = foundOrder;
         }
 
         // Calculate total
@@ -66,18 +67,17 @@ export class InvoiceService {
         const discountAmount = dto.discountAmount || 0;
         const totalAmount = dto.subtotal + taxAmount - discountAmount;
 
-        const invoice = this.invoiceRepository.create({
-            invoiceNumber: this.generateInvoiceNumber(),
-            customer,
-            store,
-            order,
-            subtotal: dto.subtotal,
-            taxAmount,
-            discountAmount,
-            totalAmount,
-            notes: dto.notes,
-            dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
-        });
+        const invoice = new Invoice();
+        invoice.invoiceNumber = this.generateInvoiceNumber();
+        invoice.customer = customer;
+        invoice.store = store;
+        if (order) invoice.order = order;
+        invoice.subtotal = dto.subtotal;
+        invoice.taxAmount = taxAmount;
+        invoice.discountAmount = discountAmount;
+        invoice.totalAmount = totalAmount;
+        if (dto.notes) invoice.notes = dto.notes;
+        if (dto.dueDate) invoice.dueDate = new Date(dto.dueDate);
 
         return this.invoiceRepository.save(invoice);
     }
@@ -185,4 +185,3 @@ export class InvoiceService {
         });
     }
 }
-

@@ -56,6 +56,7 @@ import { BarcodeModule } from './barcode/barcode.module';
     PrescriptionModule,
     InvoiceModule,
     PosModule,
+    BarcodeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

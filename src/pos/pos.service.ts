@@ -62,12 +62,11 @@ export class PosService {
             throw new BadRequestException('There is already an open session for this store');
         }
 
-        const session = this.sessionRepository.create({
-            store,
-            cashier,
-            openingBalance: dto.openingBalance,
-            status: SessionStatus.OPEN,
-        });
+        const session = new PosSession();
+        session.store = store;
+        session.cashier = cashier;
+        session.openingBalance = dto.openingBalance;
+        session.status = SessionStatus.OPEN;
 
         return this.sessionRepository.save(session);
     }
@@ -88,7 +87,9 @@ export class PosService {
         }
 
         session.closingBalance = dto.closingBalance;
-        session.closingNotes = dto.closingNotes;
+        if (dto.closingNotes) {
+            session.closingNotes = dto.closingNotes;
+        }
         session.status = SessionStatus.CLOSED;
         session.closedAt = new Date();
 
@@ -155,9 +156,12 @@ export class PosService {
         }
 
         // Get customer if provided
-        let customer = null;
+        let customer: User | undefined = undefined;
         if (dto.customerId) {
-            customer = await this.userRepository.findOneBy({ id: dto.customerId });
+            const foundCustomer = await this.userRepository.findOneBy({ id: dto.customerId });
+            if (foundCustomer) {
+                customer = foundCustomer;
+            }
         }
 
         // Process items and calculate totals
@@ -200,23 +204,22 @@ export class PosService {
             throw new BadRequestException('Insufficient payment amount');
         }
 
-        const transaction = this.transactionRepository.create({
-            transactionNumber: this.generateTransactionNumber(),
-            store: session.store,
-            cashier,
-            customer,
-            session,
-            items: transactionItems,
-            subtotal,
-            taxAmount,
-            discountAmount,
-            totalAmount,
-            paymentMethod: dto.paymentMethod,
-            amountPaid: dto.amountPaid,
-            changeAmount,
-            notes: dto.notes,
-            status: TransactionStatus.COMPLETED,
-        });
+        const transaction = new PosTransaction();
+        transaction.transactionNumber = this.generateTransactionNumber();
+        transaction.store = session.store;
+        transaction.cashier = cashier;
+        if (customer) transaction.customer = customer;
+        transaction.session = session;
+        transaction.items = transactionItems;
+        transaction.subtotal = subtotal;
+        transaction.taxAmount = taxAmount;
+        transaction.discountAmount = discountAmount;
+        transaction.totalAmount = totalAmount;
+        transaction.paymentMethod = dto.paymentMethod;
+        transaction.amountPaid = dto.amountPaid;
+        transaction.changeAmount = changeAmount;
+        if (dto.notes) transaction.notes = dto.notes;
+        transaction.status = TransactionStatus.COMPLETED;
 
         const savedTransaction = await this.transactionRepository.save(transaction);
 
@@ -400,4 +403,3 @@ export class PosService {
         };
     }
 }
-
