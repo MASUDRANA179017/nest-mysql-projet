@@ -25,12 +25,12 @@ async function bootstrap() {
 
    // Enable CORS for your frontend
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173','http://192.168.68.60:3000' ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? 8000);
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
 

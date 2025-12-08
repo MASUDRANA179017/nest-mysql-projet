@@ -7,7 +7,7 @@ import { existsSync } from 'fs';
 @Injectable()
 export class ImageService {
   async uploadImage(file: File, folder: 'profiles' | 'stores' | 'products' | 'default' = 'profiles'): Promise<{ url: string }> {
-    const baseUrl = process.env.BASE_URL || 'http://localhost:8000';
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     const fileName = file.filename || file.originalname;
     const url = `${baseUrl}/uploads/${folder}/${fileName}`;
     return { url };
