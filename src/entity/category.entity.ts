@@ -1,3 +1,4 @@
+import { Coupon } from "./coupon.entity";
 import { Product } from "./product.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -15,5 +16,8 @@ export class Category {
 
     @OneToMany(() => Product, (product) => product.category)
     product: Product[];
+
+    @OneToMany(() => Coupon, (coupons) => coupons.categories)
+    coupons: Coupon[];
 
 } 

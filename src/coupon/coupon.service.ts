@@ -1,162 +1,151 @@
 import { CreateCouponDto } from './dto/create-coupon.dto';
+import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Category } from 'src/entity/category.entity';
+import { Repository, In } from 'typeorm';
 import { Coupon } from 'src/entity/coupon.entity';
-import { Product } from 'src/entity/product.entity';
 import { Store } from 'src/entity/store.entity';
+import { Product } from 'src/entity/product.entity';
+import { Category } from 'src/entity/category.entity';
 import { User } from 'src/entity/user.entity';
-import { Repository } from 'typeorm';
-import { UpdateCouponDto } from './dto/update-coupon.dto';
 
 @Injectable()
 export class CouponService {
-    constructor(
-        @InjectRepository(Coupon)
-        private couponRepository: Repository<Coupon>,
+  constructor(
+    @InjectRepository(Coupon)
+    private couponRepository: Repository<Coupon>,
 
-        @InjectRepository(Store)
-        private storeRepository: Repository<Store>,
+    @InjectRepository(Store)
+    private storeRepository: Repository<Store>,
 
-        @InjectRepository(Product)
-        private productRepository: Repository<Product>,
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
 
-        @InjectRepository(Category)
-        private categoryRepository: Repository<Category>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
 
-        @InjectRepository(User)
-        private userRepository: Repository<User>
-    ) { }
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
-    async create(createCouponDto: CreateCouponDto, userId: number): Promise<Coupon> {
-        const { code, discountType, discountValue, scope, storeId, productId, categoryId, expiresAt } = createCouponDto
-        const store = await this.storeRepository.findOne({ where: { id: storeId, owner: { id: userId } } })
+  async create(createCouponDto: CreateCouponDto, userId: number): Promise<Coupon> {
+    const { code, discountType, discountValue, scope, storeId, productIds = [], categoryIds = [], expiresAt } = createCouponDto;
 
-        if (!store) {
-            throw new ForbiddenException("Store not found or You are not the owner")
-        }
+    // 1️⃣ Validate store ownership
+    const store = await this.storeRepository.findOne({
+      where: { id: storeId, owner: { id: userId } },
+    });
+    if (!store) throw new ForbiddenException('Store not found or you are not the owner');
 
-        const existingCoupon = await this.couponRepository.findOne({ where: { code } })
+    // 2️⃣ Check duplicate code
+    const existingCoupon = await this.couponRepository.findOne({ where: { code } });
+    if (existingCoupon) throw new ForbiddenException('Coupon code already exists');
 
-        if (existingCoupon) {
-            throw new ForbiddenException("Coupon already exists")
-        }
+    // 3️⃣ Validate scope
+    let products: Product[] = [];
+    let categories: Category[] = [];
 
-        if (scope === "PRODUCT" && productId) {
-            const product = await this.productRepository.findOne({ where: { id: productId, store: { id: storeId } } })
-            if (!product) {
-                throw new BadRequestException("Product not found or does not belong to this store")
-            }
-        } else if (scope === "CATEGORY" && categoryId) {
-            const category = await this.categoryRepository.findOne({ where: { id: categoryId } })
-            if (!category) {
-                throw new BadRequestException("Category not found")
-            }
-
-        } else if (scope === "FLAT") {
-            if (productId || categoryId) {
-                throw new BadRequestException("FLAT coupons do not require productId or CategoryId remove it")
-            }
-        } else {
-            throw new BadRequestException("Invalid scope or missing required field")
-        }
-
-        if (discountType === "PERCENTAGE" && (discountValue < 0 || discountValue > 100)) {
-            throw new BadRequestException("Percentage discount must be between 1 and 100")
-        } else if (discountType === "FIXED" && discountValue <= 0) {
-            throw new BadRequestException("Fixed discount must be greater then 0")
-        }
-
-        const coupon = this.couponRepository.create({
-            code,
-            discountType,
-            discountValue,
-            scope,
-            store,
-            productId,
-            categoryId,
-            expiresAt: expiresAt ? new Date(expiresAt) : "",
-            createdAt: new Date()
-        }) as Partial<Coupon>;
-
-        return this.couponRepository.save(coupon);
-
+    if (scope === 'PRODUCT') {
+      if (!productIds.length) throw new BadRequestException('PRODUCT scope requires productIds');
+      products = await this.productRepository.find({ where: { id: In(productIds), store: { id: storeId } } });
+      if (products.length !== productIds.length)
+        throw new BadRequestException('Some products not found or do not belong to this store');
     }
 
-    async getAllCoupons(): Promise<Coupon[]> {
-        return this.couponRepository.find({ relations: ['store'] });
+    if (scope === 'CATEGORY') {
+      if (!categoryIds.length) throw new BadRequestException('CATEGORY scope requires categoryIds');
+      categories = await this.categoryRepository.find({ where: { id: In(categoryIds) } });
+      if (categories.length !== categoryIds.length)
+        throw new BadRequestException('Some categories not found');
     }
 
-
-    async updateCoupon(id: number, updateCouponDto: UpdateCouponDto, userId: number): Promise<Coupon> {
-        const { code, discountType, discountValue, scope, storeId, productId, categoryId, expiresAt } = updateCouponDto
-        const store = await this.storeRepository.findOne({ where: { id: storeId, owner: { id: userId } } })
-
-        if (!store) {
-            throw new ForbiddenException("Store not found or You are not the owner")
-        }
-
-        const existingCoupon = await this.couponRepository.findOne({ where: { code } })
-
-        if (existingCoupon) {
-            throw new ForbiddenException("Coupon already exists")
-        }
-
-        const coupon = await this.couponRepository.findOne({ where: { id: Number(id) }, relations: ['store'] });
-        if (!coupon) {
-            throw new NotFoundException(`Coupons ${id} not found`)
-        }
-
-        if (scope === "PRODUCT" && productId) {
-            const product = await this.productRepository.findOne({ where: { id: productId, store: { id: storeId } } })
-            if (!product) {
-                throw new BadRequestException("Product not found or does not belong to this store")
-            }
-        } else if (scope === "CATEGORY" && categoryId) {
-            const category = await this.categoryRepository.findOne({ where: { id: categoryId } })
-            if (!category) {
-                throw new BadRequestException("Category not found")
-            }
-
-        } else if (scope === "FLAT") {
-            if (productId || categoryId) {
-                throw new BadRequestException("FLAT coupons do not require productId or CategoryId remove it")
-            }
-        } else {
-            throw new BadRequestException("Invalid scope or missing required field")
-        }
-
-        if (discountType === "PERCENTAGE" && (discountValue < 0 || discountValue > 100)) {
-            throw new BadRequestException("Percentage discount must be between 1 and 100")
-        } else if (discountType === "FIXED" && discountValue <= 0) {
-            throw new BadRequestException("Fixed discount must be greater then 0")
-        }
-
-        // Assign other updatable fields
-        Object.assign(coupon, updateCouponDto);
-
-        return this.couponRepository.save(coupon);
-
+    if (scope === 'FLAT' && (productIds.length || categoryIds.length)) {
+      throw new BadRequestException('FLAT coupons do not require productIds or categoryIds');
     }
 
+    // 4️⃣ Validate discount
+    if (discountType === 'PERCENTAGE' && (discountValue <= 0 || discountValue > 100))
+      throw new BadRequestException('Percentage discount must be between 1 and 100');
 
+    if (discountType === 'FIXED' && discountValue <= 0)
+      throw new BadRequestException('Fixed discount must be greater than 0');
 
-    async deleteCoupon(id: string, userId: number): Promise<void> {
-        const coupon = await this.couponRepository.findOne({ where: { id: Number(id) }, relations: ['store'] });
-        const store = await this.storeRepository.findOne({ where: { id: coupon?.store.id }, relations: ['owner'] })
-        const user = await this.userRepository.findOneBy({ id: userId });
+    // 5️⃣ Create coupon entity
+    const coupon = this.couponRepository.create({
+        code,
+        discountType,
+        discountValue,
+        scope,
+        store,
+        products: products.length ? products : undefined,
+        categories: categories.length ? categories : undefined,
+        expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+    });
 
-        //  console.log(store?.owner.id===user?.id);
+    return this.couponRepository.save(coupon);
+  }
 
+  async updateCoupon(id: number, updateCouponDto: UpdateCouponDto, userId: number): Promise<Coupon> {
+    const { code, discountType, discountValue, scope, storeId, productIds = [], categoryIds = [], expiresAt } = updateCouponDto;
 
-        if (store?.owner.id !== user?.id) {
-            throw new ForbiddenException('you are not owner to delete this coupon')
+    const coupon = await this.couponRepository.findOne({
+      where: { id },
+      relations: ['store', 'products', 'categories'],
+    });
+    if (!coupon) throw new NotFoundException(`Coupon ${id} not found`);
 
-        }
-        if (!coupon) {
-            throw new NotFoundException(`Coupon not found`);
-        }
-        await this.couponRepository.delete(id);
+    const store = await this.storeRepository.findOne({ where: { id: storeId, owner: { id: userId } } });
+    if (!store) throw new ForbiddenException('Store not found or you are not the owner');
+
+    if (code && code !== coupon.code) {
+      const existingCoupon = await this.couponRepository.findOne({ where: { code } });
+      if (existingCoupon) throw new ForbiddenException('Coupon code already exists');
     }
 
+    // Update products/categories
+    if (scope === 'PRODUCT') {
+      const products = await this.productRepository.find({ where: { id: In(productIds), store: { id: storeId } } });
+      if (products.length !== productIds.length)
+        throw new BadRequestException('Some products not found or do not belong to this store');
+      coupon.products = products;
+      coupon.categories = [];
+    } else if (scope === 'CATEGORY') {
+      const categories = await this.categoryRepository.find({ where: { id: In(categoryIds) } });
+      if (categories.length !== categoryIds.length)
+        throw new BadRequestException('Some categories not found');
+      coupon.categories = categories;
+      coupon.products = [];
+    } else if (scope === 'FLAT') {
+      coupon.products = [];
+      coupon.categories = [];
+    }
+
+    coupon.code = code ?? coupon.code;
+    coupon.discountType = discountType ?? coupon.discountType;
+    coupon.discountValue = discountValue ?? coupon.discountValue;
+    coupon.scope = scope ?? coupon.scope;
+    coupon.expiresAt = expiresAt ? new Date(expiresAt) : coupon.expiresAt;
+
+    return this.couponRepository.save(coupon);
+  }
+
+  async getAllCoupons(): Promise<Coupon[]> {
+    return this.couponRepository.find({ relations: ['store', 'products', 'categories'] });
+  }
+
+  async getCouponById(id: number): Promise<Coupon> {
+    const coupon = await this.couponRepository.findOne({ where: { id }, relations: ['store', 'products', 'categories'] });
+    if (!coupon) throw new NotFoundException(`Coupon ${id} not found`);
+    return coupon;
+  }
+
+  async deleteCoupon(id: number, userId: number): Promise<void> {
+    const coupon = await this.couponRepository.findOne({ where: { id }, relations: ['store'] });
+    if (!coupon) throw new NotFoundException('Coupon not found');
+
+    const store = coupon.store;
+    if (!store || store.owner.id !== userId) throw new ForbiddenException('You are not the owner of this coupon');
+
+    await this.couponRepository.delete(id);
+  }
 }

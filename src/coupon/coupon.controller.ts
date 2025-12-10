@@ -34,6 +34,16 @@ export class CouponController {
     async getCoupon() {
         return this.couponService.getAllCoupons();
     }
+    @Get('getById/:id')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({summary: "Get Coupon by ID"})
+    @ApiResponse({status:200, description:"Coupon fetched successfully"})
+    @ApiResponse({status:401, description:"Unauthorized"})
+    @ApiResponse({status: 500, description:"Internal serve error "})
+    async getCouponById(@Param("id") id: string){
+        return this.couponService.getCouponById(+id)
+    }
 
 
     @Put('update-coupon/:id')
@@ -56,6 +66,6 @@ export class CouponController {
         description: "Coupon deleted successfully",
     })
     async deleteCoupon(@Param("id") id: string, @Request() req: any) {
-        return this.couponService.deleteCoupon(id, req.user.id);
+        return this.couponService.deleteCoupon(+id, req.user.id);
     }
 }
