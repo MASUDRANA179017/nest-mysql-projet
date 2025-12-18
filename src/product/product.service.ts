@@ -88,10 +88,18 @@ export class ProductService {
         return this.productRepository.save(product);
     }
 
-    async getAllProducts(): Promise<Product[]> {
+    async getAllProducts(type?: string): Promise<Product[]> {
+
+        const where: any = {};
+        if (type === 'service') {
+            where.isService = true;
+        } else if (type === 'product') {
+            where.isService = false;
+        }
 
         // all products
         return this.productRepository.find({
+            where,
             relations: ['vendor', 'store', 'weightUnit' ,'category', 'reviews'],
         });
 
@@ -255,12 +263,21 @@ export class ProductService {
 
 
 
-    async vendorProduct(userId: number): Promise<Product[]> {
+    async vendorProduct(userId: number, type?: string): Promise<Product[]> {
         const user = await this.userRepository.findOneBy({ id: userId })
+
+        const whereCondition: any = {};
+
+        if (type === 'service') {
+            whereCondition.isService = true;
+        } else if (type === 'product') {
+            whereCondition.isService = false;
+        }
 
         if (user?.role === "admin") {
             // Admin sees all products
             return this.productRepository.find({
+                where: whereCondition,
                 relations: ['vendor', 'store', 'category', 'reviews'],
             });
         }
@@ -269,7 +286,7 @@ export class ProductService {
             // console.log("this.productRepository");
 
             return this.productRepository.find({
-                where: { vendor: {id: userId} },
+                where: { ...whereCondition, vendor: { id: userId } },
                 relations: ['vendor', 'store', 'category', 'reviews'],
             });
         }

@@ -1,5 +1,5 @@
 import { CheckoutService } from './checkout.service';
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/jwt-auth.guard';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -38,5 +38,19 @@ export class CheckoutController {
     @ApiOperation({ summary: "Get logged-in vendor's orders" })
     async getVendorOrders(@Request() req: any) {
         return this.checkoutService.getVendorOrders(req.user.id);
+    }
+
+    @Patch(':id/status')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update order status' })
+    @ApiResponse({ status: 200, description: 'Order status updated successfully.' })
+    @ApiResponse({ status: 404, description: 'Order not found.' })
+    async updateOrderStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Body('status') status: string,
+    ) {
+        console.log(`[Controller] Updating Order ID: ${id} to Status: ${status}`);
+        return this.checkoutService.updateOrderStatus(id, status);
     }
 }

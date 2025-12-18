@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ProductService } from "./product.service";
 import { JwtAuthGuard } from "src/jwt-auth.guard";
@@ -47,8 +47,8 @@ export class ProductController {
     status: 403,
     description: "Products not found",
   })
-  async getAllProducts() {
-    return this.productService.getAllProducts();
+  async getAllProducts(@Query('type') type?: string) {
+    return this.productService.getAllProducts(type);
   }
 
   @Get("store/:storeId")
@@ -73,8 +73,38 @@ export class ProductController {
     status: 403,
     description: "Products not found",
   })
-  async userRoleProducts(@Request() req: any) {
-    return this.productService.vendorProduct(req.user.id);
+  async userRoleProducts(@Request() req: any, @Query('type') type?: string) {
+    return this.productService.vendorProduct(req.user.id, type);
+  }
+
+  @Get("vendor/services")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getVendorServices(@Request() req: any) {
+    return this.productService.vendorProduct(req.user.id, 'service');
+  }
+
+  @Get("vendor/products")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getVendorProducts(@Request() req: any) {
+    return this.productService.vendorProduct(req.user.id, 'product');
+  }
+
+  @Post("create/service")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async createService(@Body() createProductDto: CreateProductDto, @Request() req: any) {
+    createProductDto.isService = true;
+    return this.productService.createProduct(createProductDto, req.user.id);
+  }
+
+  @Post("create/product")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async createPhysicalProduct(@Body() createProductDto: CreateProductDto, @Request() req: any) {
+    createProductDto.isService = false;
+    return this.productService.createProduct(createProductDto, req.user.id);
   }
 
 

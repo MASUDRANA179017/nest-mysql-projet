@@ -16,6 +16,15 @@ export class Order {
   @Column()
   totalAmount: number;
 
+  @Column({ nullable: true })
+  customerName: string;
+
+  @Column({ nullable: true })
+  customerPhone: string;
+
+  @Column({ nullable: true })
+  notes: string;
+
   @Column()
   shippingAddress: string;
 

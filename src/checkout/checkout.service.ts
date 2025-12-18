@@ -63,7 +63,10 @@ export class CheckoutService {
         const order = this.orderRepository.create({
             user,
             totalAmount,
-            shippingAddress: createOrderDto.shippingAddress
+            shippingAddress: createOrderDto.shippingAddress,
+            customerName: createOrderDto.customerName,
+            customerPhone: createOrderDto.customerPhone,
+            notes: createOrderDto.notes,
         });
 
         const savedOrder = await this.orderRepository.save(order);
@@ -138,5 +141,19 @@ export class CheckoutService {
                 originalTotalAmount: order.totalAmount
             };
         });
+    }
+
+    async updateOrderStatus(orderId: number, status: string) {
+        console.log(`[Service] Finding order ${orderId}...`);
+        const order = await this.orderRepository.findOne({ where: { id: orderId } });
+        if (!order) {
+            console.error(`[Service] Order ${orderId} not found`);
+            throw new NotFoundException(`Order with ID ${orderId} not found`);
+        }
+        console.log(`[Service] Current status: ${order.status}. New status: ${status}`);
+        order.status = status;
+        const savedOrder = await this.orderRepository.save(order);
+        console.log(`[Service] Order saved. Status is now: ${savedOrder.status}`);
+        return savedOrder;
     }
 }
