@@ -23,6 +23,11 @@ export class CreateProductDto {
   @Min(0)
   stock: number;
 
+  @ApiProperty({ description: "Product barcode", example: "123456789", required: false })
+  @IsOptional()
+  @IsString()
+  barcode?: string;
+
   @ApiProperty({ description: "Manufacturing date", example: "2024-01-15", required: false })
   @IsOptional()
   @IsDateString()

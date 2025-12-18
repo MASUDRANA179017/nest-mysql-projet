@@ -43,13 +43,14 @@ export class AuthService {
       const vendor = await this.userRepository.findOne({ where: { id: Number(refVendorId) } });
       if (vendor && vendor.role === 'vendor') {
         user.referredByVendorId = Number(refVendorId);
-        user.walletBalance = Number(user.walletBalance) + 10;
         await this.userRepository.save(user);
+        vendor.walletBalance = Number(vendor.walletBalance) + 10;
+        await this.userRepository.save(vendor);
         const txn = this.walletTransactionRepository.create({
           amount: 10,
           type: 'deposit',
-          description: `Referral bonus from vendor #${refVendorId}`,
-          user: user
+          description: `Referral bonus for adding user #${user.id}`,
+          user: vendor
         });
         await this.walletTransactionRepository.save(txn);
       }

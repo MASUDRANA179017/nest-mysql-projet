@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/entity/user.entity';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { Review } from 'src/entity/review.entity';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class StoreService {
@@ -133,6 +134,36 @@ export class StoreService {
 
         owner.isActive = isActive;
         return this.userRepository.save(owner);
+    }
+
+    async sendMail(storeId: number, to: string, subject: string, text: string, html: string | undefined, userId: number) {
+        const store = await this.storeRepository.findOne({ where: { id: storeId }, relations: ['owner'] });
+        if (!store) {
+            throw new Error('Store not found');
+        }
+        if (store.owner.id !== userId) {
+            throw new Error('You are not authorized to send mail for this store');
+        }
+        if (!store.smtpHost || !store.smtpPort || !store.smtpUser || !store.smtpPass || !store.smtpFrom) {
+            throw new Error('SMTP settings are not configured');
+        }
+        const transporter = nodemailer.createTransport({
+            host: store.smtpHost,
+            port: Number(store.smtpPort),
+            secure: Boolean(store.smtpSecure),
+            auth: {
+                user: store.smtpUser,
+                pass: store.smtpPass,
+            },
+        });
+        const info = await transporter.sendMail({
+            from: store.smtpFrom,
+            to,
+            subject,
+            text,
+            html,
+        });
+        return { messageId: info.messageId, accepted: info.accepted, rejected: info.rejected };
     }
 
 

@@ -131,4 +131,20 @@ export class StoreController {
         return this.storeService.deleteStore(+id, req.user.id);
     }
 
+    @Post('sendMail/:id')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Send email using store SMTP settings' })
+    @ApiResponse({
+        status: 200,
+        description: 'Email sent',
+    })
+    async sendMail(
+        @Param('id') id: string,
+        @Body() body: { to: string, subject: string, text?: string, html?: string },
+        @Request() req: any
+    ) {
+        return this.storeService.sendMail(+id, body.to, body.subject, body.text || '', body.html, req.user.id);
+    }
+
 }

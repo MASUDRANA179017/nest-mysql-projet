@@ -25,6 +25,24 @@ export class Store {
 
     @Column({ nullable: true })
     city: string;
+    
+    @Column({ nullable: true })
+    smtpHost?: string;
+    
+    @Column({ nullable: true, type: 'int' })
+    smtpPort?: number;
+    
+    @Column({ nullable: true })
+    smtpUser?: string;
+    
+    @Column({ nullable: true })
+    smtpPass?: string;
+    
+    @Column({ nullable: true, type: 'boolean' })
+    smtpSecure?: boolean;
+    
+    @Column({ nullable: true })
+    smtpFrom?: string;
 
     @ManyToOne(() => User, (user) => user.stores)
     owner: User;

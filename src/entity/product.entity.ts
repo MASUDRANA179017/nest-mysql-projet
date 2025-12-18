@@ -37,6 +37,9 @@ export class Product {
     isService: boolean;
 
     @Column({ nullable: true })
+    barcode: string;
+
+    @Column({ nullable: true })
     productThumbnail: string;
     
     @Column("simple-array", { nullable: true })

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UpdateStoreDto {
     @ApiProperty({
@@ -27,5 +27,34 @@ export class UpdateStoreDto {
     @IsString()
     imageUrl?: string;
 
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    smtpHost?: string;
+
+    @ApiProperty({ required: false })
+    @IsNumber()
+    @IsOptional()
+    smtpPort?: number;
+
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    smtpUser?: string;
+
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    smtpPass?: string;
+
+    @ApiProperty({ required: false })
+    @IsBoolean()
+    @IsOptional()
+    smtpSecure?: boolean;
+
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    smtpFrom?: string;
 }
 
