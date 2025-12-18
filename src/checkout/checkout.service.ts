@@ -72,4 +72,27 @@ export class CheckoutService {
         return this.orderRepository.find({ relations: ['user', 'items'] });
     }
 
+    async getVendorOrders(userId: number) {
+        const orders = await this.orderRepository.createQueryBuilder('order')
+            .leftJoinAndSelect('order.items', 'items')
+            .leftJoinAndSelect('items.product', 'product')
+            .leftJoinAndSelect('product.store', 'store')
+            .leftJoinAndSelect('store.owner', 'owner')
+            .leftJoinAndSelect('order.user', 'user')
+            .where('owner.id = :userId', { userId })
+            .orderBy('order.createdAt', 'DESC')
+            .getMany();
+
+        return orders.map(order => {
+            const vendorItems = order.items.filter(item => item.product?.store?.owner?.id === userId);
+            const vendorTotal = vendorItems.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
+
+            return {
+                ...order,
+                items: vendorItems,
+                totalAmount: vendorTotal,
+                originalTotalAmount: order.totalAmount
+            };
+        });
+    }
 }

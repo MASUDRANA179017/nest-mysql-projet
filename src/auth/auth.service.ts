@@ -7,17 +7,20 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, UpdateResult } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import { UpdateDto } from "./dto/Update.dto";
+import { WalletTransaction } from "../entity/wallet-transaction.entity";
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(WalletTransaction)
+    private walletTransactionRepository: Repository<WalletTransaction>,
     private jwtService: JwtService,
   ) { }
 
   async register(registerDto: RegisterDto) {
-    const { email, password, firstName, lastName, username, profileImage, role } = registerDto;
+    const { email, password, firstName, lastName, username, profileImage, role, refVendorId } = registerDto;
     const existingUser = await this.userRepository.findOne({ where: { email } });
      if (existingUser) {
     throw new BadRequestException("User already exists with this email");
@@ -35,6 +38,22 @@ export class AuthService {
       refreshToken: uuidv4(),
     });
     await this.userRepository.save(user);
+
+    if (refVendorId) {
+      const vendor = await this.userRepository.findOne({ where: { id: Number(refVendorId) } });
+      if (vendor && vendor.role === 'vendor') {
+        user.referredByVendorId = Number(refVendorId);
+        user.walletBalance = Number(user.walletBalance) + 10;
+        await this.userRepository.save(user);
+        const txn = this.walletTransactionRepository.create({
+          amount: 10,
+          type: 'deposit',
+          description: `Referral bonus from vendor #${refVendorId}`,
+          user: user
+        });
+        await this.walletTransactionRepository.save(txn);
+      }
+    }
     const payload = {
       email: user.email,
       sub: user.id,
@@ -54,6 +73,7 @@ export class AuthService {
         lastName: user.lastName,
         username: user.username,
         role: user.role,
+        walletBalance: user.walletBalance,
       },
     };
   }

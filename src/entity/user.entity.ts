@@ -27,6 +27,9 @@ export class User {
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
     walletBalance: number;
 
+    @Column({ type: 'int', nullable: true })
+    referredByVendorId?: number;
+
     @Column({ nullable: true })
     refreshToken?: string;
 

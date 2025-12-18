@@ -275,6 +275,15 @@ export class PosService {
         });
     }
 
+    // Get all transactions for a store
+    async getStoreTransactions(storeId: number): Promise<PosTransaction[]> {
+        return this.transactionRepository.find({
+            where: { store: { id: storeId } },
+            relations: ['cashier', 'customer', 'session'],
+            order: { createdAt: 'DESC' },
+        });
+    }
+
     // Refund a transaction
     async refundTransaction(transactionId: number, reason?: string): Promise<PosTransaction> {
         const transaction = await this.transactionRepository.findOne({

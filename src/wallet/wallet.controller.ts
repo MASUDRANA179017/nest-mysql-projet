@@ -10,16 +10,16 @@ export class WalletController {
 
     @Get('balance')
     async getBalance(@Request() req) {
-        return await this.walletService.getBalance(req.user.userId);
+        return await this.walletService.getBalance(req.user.id);
     }
 
     @Get('transactions')
     async getTransactions(@Request() req) {
-        return await this.walletService.getTransactions(req.user.userId);
+        return await this.walletService.getTransactions(req.user.id);
     }
 
     @Post('deposit')
     async deposit(@Request() req, @Body() depositDto: DepositDto) {
-        return await this.walletService.deposit(req.user.userId, depositDto);
+        return await this.walletService.deposit(req.user.id, depositDto);
     }
 }

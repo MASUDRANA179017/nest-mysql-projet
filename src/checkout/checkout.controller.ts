@@ -31,4 +31,12 @@ export class CheckoutController {
     async getAllOrders() {
         return this.checkoutService.getAllOrders();
     }
+
+    @Get('vendor-orders')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: "Get logged-in vendor's orders" })
+    async getVendorOrders(@Request() req: any) {
+        return this.checkoutService.getVendorOrders(req.user.id);
+    }
 }

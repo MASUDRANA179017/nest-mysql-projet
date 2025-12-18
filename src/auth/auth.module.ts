@@ -5,10 +5,11 @@ import { JwtModule } from "@nestjs/jwt";
 import { JwtStrategy } from "./jwt.strategy";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "src/entity/user.entity";
+import { WalletTransaction } from "src/entity/wallet-transaction.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, WalletTransaction]),
     JwtModule.register({
       secret: "my_jwt_secret",
       signOptions: { expiresIn: "1h" },

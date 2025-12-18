@@ -94,6 +94,14 @@ export class PosController {
         return this.posService.getSessionTransactions(sessionId);
     }
 
+    @Get('/transactions/store/:storeId')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get all transactions for a store' })
+    async getStoreTransactions(@Param('storeId', ParseIntPipe) storeId: number) {
+        return this.posService.getStoreTransactions(storeId);
+    }
+
     @Put('/transaction/refund/:transactionId')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()

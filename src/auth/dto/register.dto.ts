@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength, IsOptional, IsNumber } from "class-validator";
 
 export class RegisterDto {
   @ApiProperty({ description: "User's email address", example: "user@gmail.com"})
@@ -41,5 +41,14 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   role: 'admin' |'vendor' | 'user';
+
+  @ApiProperty({
+    description: "Optional referral vendor ID to credit wallet",
+    example: 12,
+    required: false
+  })
+  @IsOptional()
+  @IsNumber()
+  refVendorId?: number;
 
 }
