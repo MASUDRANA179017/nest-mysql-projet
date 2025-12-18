@@ -76,8 +76,32 @@ export class StoreController {
         status: 404,
         description: 'Store not found',
     })
-    async getStoreById(@Param('id') id: string) {
+    async getSingleStore(@Param('id') id: string) {
         return this.storeService.getStoreById(+id);
+    }
+
+    @Post(':id/follow')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Follow a store' })
+    async followStore(@Param('id') id: string, @Request() req: any) {
+        return this.storeService.followStore(req.user.id, +id);
+    }
+
+    @Delete(':id/follow')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Unfollow a store' })
+    async unfollowStore(@Param('id') id: string, @Request() req: any) {
+        return this.storeService.unfollowStore(req.user.id, +id);
+    }
+
+    @Get(':id/is-following')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Check if user is following a store' })
+    async checkFollowStatus(@Param('id') id: string, @Request() req: any) {
+        return this.storeService.isFollowing(req.user.id, +id);
     }
 
 

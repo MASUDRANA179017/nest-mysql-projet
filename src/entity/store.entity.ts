@@ -1,5 +1,5 @@
 
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, ManyToMany } from "typeorm";
 import { User } from "./user.entity";
 import { Coupon } from "./coupon.entity";
 import { Prescription } from "./prescription.entity";
@@ -46,6 +46,9 @@ export class Store {
 
     @ManyToOne(() => User, (user) => user.stores)
     owner: User;
+
+    @ManyToMany(() => User, (user) => user.followedStores)
+    followers: User[];
 
     @OneToMany(() => Prescription, (prescriptions) => prescriptions.store)
     prescriptions: Prescription[];

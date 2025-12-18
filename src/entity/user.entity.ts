@@ -1,5 +1,5 @@
 
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable } from "typeorm";
 import { Store } from "./store.entity";
 import { Order } from "./order.entity";
 import { Prescription } from "./prescription.entity";
@@ -35,6 +35,13 @@ export class User {
 
     @Column({ nullable: true })
     profileImage?: string;
+
+    @Column({ default: 0 })
+    walletPoints: number;
+
+    @ManyToMany(() => Store, (store) => store.followers)
+    @JoinTable()
+    followedStores: Store[];
 
     @OneToMany(() => Store, (store) => store.owner)
     stores: Store[];

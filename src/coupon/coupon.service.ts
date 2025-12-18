@@ -1,5 +1,6 @@
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
+import { ApplyCouponDto } from './dto/apply-coupon.dto';
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -127,6 +128,91 @@ export class CouponService {
     coupon.expiresAt = expiresAt ? new Date(expiresAt) : coupon.expiresAt;
 
     return this.couponRepository.save(coupon);
+  }
+
+  async applyCoupon(applyCouponDto: ApplyCouponDto): Promise<{ valid: boolean, discount: number, message: string }> {
+    const { code, storeId, items } = applyCouponDto;
+
+    const coupon = await this.couponRepository.findOne({
+        where: { code },
+        relations: ['store', 'products', 'categories']
+    });
+
+    if (!coupon) {
+        throw new NotFoundException('Coupon not found');
+    }
+
+    // Check expiration
+    if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+        throw new BadRequestException('Coupon expired');
+    }
+
+    // Check store
+    if (coupon.store.id !== storeId) {
+        throw new BadRequestException('Coupon not valid for this store');
+    }
+
+    let discount = 0;
+    const cartTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (coupon.scope === 'FLAT') {
+        if (coupon.discountType === 'FIXED') {
+            discount = Number(coupon.discountValue);
+        } else {
+            discount = (cartTotal * Number(coupon.discountValue)) / 100;
+        }
+    } else if (coupon.scope === 'PRODUCT') {
+        // Calculate discount only for applicable products
+        const applicableProductIds = coupon.products.map(p => p.id);
+        let applicableTotal = 0;
+        
+        items.forEach(item => {
+            if (applicableProductIds.includes(item.productId)) {
+                applicableTotal += item.price * item.quantity;
+            }
+        });
+
+        if (applicableTotal === 0) {
+             throw new BadRequestException('Coupon not applicable to any items in cart');
+        }
+
+        if (coupon.discountType === 'FIXED') {
+             discount = Number(coupon.discountValue);
+        } else {
+            discount = (applicableTotal * Number(coupon.discountValue)) / 100;
+        }
+    } else if (coupon.scope === 'CATEGORY') {
+        const productIds = items.map(i => i.productId);
+        const dbProducts = await this.productRepository.find({
+            where: { id: In(productIds) },
+            relations: ['category']
+        });
+
+        const applicableCategoryIds = coupon.categories.map(c => c.id);
+        let applicableTotal = 0;
+
+        items.forEach(item => {
+            const dbProd = dbProducts.find(p => p.id === item.productId);
+            if (dbProd && dbProd.category && applicableCategoryIds.includes(dbProd.category.id)) {
+                applicableTotal += item.price * item.quantity;
+            }
+        });
+
+        if (applicableTotal === 0) {
+             throw new BadRequestException('Coupon not applicable to any items in cart');
+        }
+
+        if (coupon.discountType === 'FIXED') {
+            discount = Number(coupon.discountValue);
+        } else {
+            discount = (applicableTotal * Number(coupon.discountValue)) / 100;
+        }
+    }
+
+    // Ensure discount doesn't exceed total
+    if (discount > cartTotal) discount = cartTotal;
+
+    return { valid: true, discount, message: 'Coupon applied successfully' };
   }
 
   async getAllCoupons(userId: number): Promise<Coupon[]> {

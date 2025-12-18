@@ -32,7 +32,9 @@ export class ReviewService {
             throw new NotFoundException(`Product with ID ${productId} not found`);
         }
 
-        
+        // Reward user with 5 points
+        user.walletPoints = (user.walletPoints || 0) + 5;
+        await this.userRepository.save(user);
 
         const review = this.reviewRepository.create({
             ...reviewData,

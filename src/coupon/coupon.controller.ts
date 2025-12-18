@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { JwtAuthGuard } from 'src/jwt-auth.guard';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
+import { ApplyCouponDto } from './dto/apply-coupon.dto';
 
 @ApiTags('coupon')
 @Controller('coupon')
@@ -20,9 +21,18 @@ export class CouponController {
     @ApiResponse({ status: 403, description: 'You are not the store owner' })
     @ApiResponse({ status: 404, description: 'Store, Product or Category not found.' })
     @ApiResponse({ status: 500, description: 'Internal server error.' })
-
     async createCoupon(@Body() createCouponDto: CreateCouponDto, @Request() req: any) {
         return this.couponService.create(createCouponDto, req.user.id);
+    }
+
+    @Post('apply')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Apply coupon code' })
+    @ApiResponse({ status: 200, description: 'Coupon applied successfully.' })
+    @ApiResponse({ status: 400, description: 'Invalid coupon or not applicable.' })
+    async applyCoupon(@Body() applyCouponDto: ApplyCouponDto) {
+        return this.couponService.applyCoupon(applyCouponDto);
     }
 
     @Get('all-coupon')

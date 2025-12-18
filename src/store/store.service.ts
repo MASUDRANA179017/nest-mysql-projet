@@ -136,6 +136,50 @@ export class StoreService {
         return this.userRepository.save(owner);
     }
 
+    async followStore(userId: number, storeId: number): Promise<void> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['followedStores'],
+        });
+        const store = await this.storeRepository.findOne({ where: { id: storeId } });
+
+        if (!user || !store) {
+            throw new ForbiddenException('User or Store not found');
+        }
+
+        // Check if already following
+        const isFollowing = user.followedStores.some((s) => s.id === Number(storeId));
+        if (!isFollowing) {
+            user.followedStores.push(store);
+            await this.userRepository.save(user);
+        }
+    }
+
+    async unfollowStore(userId: number, storeId: number): Promise<void> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['followedStores'],
+        });
+
+        if (!user) {
+            throw new ForbiddenException('User not found');
+        }
+
+        user.followedStores = user.followedStores.filter((s) => s.id !== Number(storeId));
+        await this.userRepository.save(user);
+    }
+
+    async isFollowing(userId: number, storeId: number): Promise<{ isFollowing: boolean }> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['followedStores'],
+        });
+        if (!user) return { isFollowing: false };
+        
+        const isFollowing = user.followedStores.some((s) => s.id === Number(storeId));
+        return { isFollowing };
+    }
+
     async sendMail(storeId: number, to: string, subject: string, text: string, html: string | undefined, userId: number) {
         const store = await this.storeRepository.findOne({ where: { id: storeId }, relations: ['owner'] });
         if (!store) {

@@ -140,7 +140,10 @@ export class AuthService {
 
   async getProfile(email: string) {
 
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ 
+      where: { email },
+      relations: ['followedStores'] 
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
