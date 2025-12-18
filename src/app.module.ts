@@ -31,6 +31,9 @@ import { PosSession } from "./entity/pos-session.entity";
 import { PosTransaction } from "./entity/pos-transaction.entity";
 import { BarcodeModule } from './barcode/barcode.module';
 import { SeederModule } from './seeder/seeder.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { WalletModule } from './wallet/wallet.module';
+import { WalletTransaction } from "./entity/wallet-transaction.entity";
 
 @Module({
   imports: [
@@ -41,7 +44,7 @@ import { SeederModule } from './seeder/seeder.module';
       username: "root",
       password: "",
       database: "nest_ecommerce",
-      entities: [User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction],
+      entities: [User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction, WalletTransaction],
       synchronize: true,
     }),
     AuthModule,
@@ -59,6 +62,8 @@ import { SeederModule } from './seeder/seeder.module';
     PosModule,
     BarcodeModule,
     SeederModule,
+    DashboardModule,
+    WalletModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,6 +3,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Store } from "./store.entity";
 import { Order } from "./order.entity";
 import { Prescription } from "./prescription.entity";
+import { WalletTransaction } from "./wallet-transaction.entity";
 
 @Entity()
 export class User {
@@ -23,6 +24,9 @@ export class User {
     @Column({ type: 'varchar', default: 'user' })
     role: 'admin' | 'vendor' | 'user';
 
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    walletBalance: number;
+
     @Column({ nullable: true })
     refreshToken?: string;
 
@@ -37,4 +41,7 @@ export class User {
 
     @OneToMany(() => Order, (order) => order.user)
     orders: Order[];
+
+    @OneToMany(() => WalletTransaction, (transaction) => transaction.user)
+    transactions: WalletTransaction[];
 }
