@@ -1,13 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { 
-  IsNotEmpty, 
-  IsNumber, 
-  IsString, 
-  Min, 
-  IsArray, 
-  ArrayNotEmpty, 
-  IsDateString 
-} from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, Min, IsArray, ArrayNotEmpty, IsDateString } from "class-validator";
 
 export class CreateProductDto {
   
@@ -31,33 +23,35 @@ export class CreateProductDto {
   @Min(0)
   stock: number;
 
-  @ApiProperty({ description: "Manufacturing date", example: "2024-01-15" })
+  @ApiProperty({ description: "Manufacturing date", example: "2024-01-15", required: false })
+  @IsOptional()
   @IsDateString()
-  manufactureDate: Date;
+  manufactureDate?: Date;
 
-  @ApiProperty({ description: "Expiry date", example: "2026-01-15" })
+  @ApiProperty({ description: "Expiry date", example: "2026-01-15", required: false })
+  @IsOptional()
   @IsDateString()
-  expireDate: Date;
+  expireDate?: Date;
 
   @ApiProperty({ description: "Store ID of the vendor", example: 1 })
   @IsNotEmpty()
-  @IsNumber()
   storeId: number;
 
   @ApiProperty({ description: "Category ID", example: 1 })
   @IsNotEmpty()
-  @IsNumber()
   categoryId: number;
 
-  @ApiProperty({ description: "Brand ID", example: 3 })
-  @IsNotEmpty()
-  @IsNumber()
-  brandId: number;
+  @ApiProperty({ description: "Brand ID", example: 3, required: false })
+  @IsOptional()
+  brandId?: number;
 
-  @ApiProperty({ description: "Weight Unit ID", example: 2 })
-  @IsNotEmpty()
-  @IsNumber()
-  weightUnitId: number;
+  @ApiProperty({ description: "Weight Unit ID", example: 2, required: false })
+  @IsOptional()
+  weightUnitId?: number;
+
+  @ApiProperty({ description: "Is this a service?", example: true, required: false })
+  @IsOptional()
+  isService?: boolean;
 
   @ApiProperty({
     description: "Thumbnail image URL",

@@ -7,7 +7,7 @@ import { join } from "path";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   app.useStaticAssets(join(__dirname, '..',"uploads"),{
     prefix: "/uploads/",

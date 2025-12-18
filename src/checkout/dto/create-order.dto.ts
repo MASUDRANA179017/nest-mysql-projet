@@ -14,12 +14,4 @@ export class CreateOrderDto {
     type: [OrderItemDto],
   })
   items: OrderItemDto[];
-
-  @ApiProperty({
-    description: 'Date and time when the order was created',
-    example: '2025-07-09T12:30:00.000Z',
-  })
-  createdAt: Date;
-
-
 }

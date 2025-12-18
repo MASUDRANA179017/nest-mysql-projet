@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsString } from "class-validator"
+import { IsNotEmpty, IsString, IsOptional } from "class-validator"
 
 export class CreateStoreDto {
     @ApiProperty({
@@ -26,6 +26,24 @@ export class CreateStoreDto {
     })
     @IsString()
     imageUrl: string;
+
+    @ApiProperty({ description: "Address", example: "123 Main St", required: false })
+    @IsOptional()
+    @IsString()
+    address: string;
+
+    @ApiProperty({ description: "City", example: "New York", required: false })
+    @IsOptional()
+    @IsString()
+    city: string;
+
+    @ApiProperty({
+        description: "The category ID (Vendor Type)",
+        example: 1,
+        required: false
+    })
+    @IsOptional()
+    categoryId: number;
 
 }
 

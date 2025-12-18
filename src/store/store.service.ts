@@ -1,3 +1,4 @@
+import { Category } from 'src/entity/category.entity';
 import { Product } from 'src/entity/product.entity';
 import { ForbiddenException, Get, Injectable, Param, UseGuards } from '@nestjs/common';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -17,6 +18,8 @@ export class StoreService {
         private readonly userRepository: Repository<User>,
         @InjectRepository(Product)
         private readonly productRepository: Repository<Product>,
+        @InjectRepository(Category)
+        private readonly categoryRepository: Repository<Category>,
     ) { }
 
     async create(createStoreDto: CreateStoreDto, userId: number): Promise<Store> {
@@ -38,6 +41,13 @@ export class StoreService {
             createdAt: new Date(),
         });
 
+        if (createStoreDto.categoryId) {
+            const category = await this.categoryRepository.findOne({ where: { id: createStoreDto.categoryId } });
+            if (category) {
+                store.category = category;
+            }
+        }
+
         return this.storeRepository.save(store);
     }
 
@@ -50,13 +60,13 @@ export class StoreService {
         if (user?.role === "admin") {
             // Admin sees all stores
             stores = await this.storeRepository.find({
-                relations: ['owner'],
+                relations: ['owner', 'category'],
             });
         } else {
             // Vendor sees only their own stores
             stores = await this.storeRepository.find({
                 where: { owner: { id: userId } },
-                relations: ['owner'],
+                relations: ['owner', 'category'],
             });
         }
 
@@ -72,7 +82,7 @@ export class StoreService {
     async getStoreById(id: Number): Promise<Store> {
         const store = await this.storeRepository.findOne({
             where: { id: Number(id) },
-            relations: ['owner']
+            relations: ['owner', 'category']
         });
 
         if (!store) {

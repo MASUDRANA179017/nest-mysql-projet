@@ -1,7 +1,7 @@
 import { WeightUnit } from 'src/entity/weight-unit.entity';
 import { ImageService } from './../image/image.service';
 import { User } from 'src/entity/user.entity';
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/entity/product.entity';
 import { In, Not, Repository } from 'typeorm';
@@ -31,24 +31,30 @@ export class ProductService {
     ) { }
 
     async createProduct(createProductDto: CreateProductDto, userId: number): Promise<Product> {
-        const { storeId, categoryId, ...productData } = createProductDto;
+        const { storeId, categoryId, weightUnitId, brandId, ...productData } = createProductDto;
         const user = await this.userRepository.findOne({ where: { id: userId } });
         if (!user) {
-            throw new Error(`User with ID ${userId} not found`);
+            throw new NotFoundException(`User with ID ${userId} not found`);
         }
         const store = await this.storeRepository.findOne({ where: { id: storeId }, relations: ['owner'] });
         if (!store) {
             throw new NotFoundException(`Store with ID ${storeId} not found`);
         }
 
-        const weightUnit = await this.weightUnitRepository.findOne({ where: { id: productData.weightUnitId } });
-        if (!weightUnit) {
-            throw new NotFoundException(`Weight Unit with ID ${productData.weightUnitId} not found`);
+        let weightUnit: WeightUnit | null = null;
+        if (weightUnitId) {
+            weightUnit = await this.weightUnitRepository.findOne({ where: { id: weightUnitId } });
+            if (!weightUnit) {
+                throw new NotFoundException(`Weight Unit with ID ${weightUnitId} not found`);
+            }
         }
 
-        const brand = await this.brandRepository.findOne({ where: { id: productData.brandId } });
-        if (!brand) {
-            throw new NotFoundException(`Brand with ID ${productData.brandId} not found`);
+        let brand: Brand | null = null;
+        if (brandId) {
+            brand = await this.brandRepository.findOne({ where: { id: brandId } });
+            if (!brand) {
+                throw new NotFoundException(`Brand with ID ${brandId} not found`);
+            }
         }
 
 
@@ -60,7 +66,7 @@ export class ProductService {
         // Check for duplicate product name
         const existingProduct = await this.productRepository.findOne({ where: { name: productData.name } });
         if (existingProduct) {
-            throw new Error(`Product with name "${productData.name}" already exists.`);
+            throw new ConflictException(`Product with name "${productData.name}" already exists.`);
         }
 
         const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
@@ -95,7 +101,7 @@ export class ProductService {
         const product = await this.productRepository.findOne({ where: { id: Number(id) }, relations: ['vendor', 'store', 'category', 'reviews'] });
         // const user = await this.userRepository.findOne({ where: { id: userId } });
         if (!product) {
-            throw new Error(`Product with ID ${id} not found or you do not have permission to access it`);
+            throw new NotFoundException(`Product with ID ${id} not found`);
         }
         // if (!user) {
         //     throw new Error(`User with ID ${userId} not found`);
@@ -107,15 +113,15 @@ export class ProductService {
         });
 
         if (!productWithRelations) {
-            throw new Error(`Product with ID ${id} not found or you do not have permission to access it`);
+            throw new NotFoundException(`Product with ID ${id} not found`);
         }
 
         // Optionally, check if store and vendor are defined
         if (!productWithRelations.vendor) {
-            throw new Error(`Vendor for product with ID ${id} is undefined`);
+            throw new InternalServerErrorException(`Vendor for product with ID ${id} is undefined`);
         }
         if (!productWithRelations.store) {
-            throw new Error(`Store for product with ID ${id} is undefined`);
+            throw new InternalServerErrorException(`Store for product with ID ${id} is undefined`);
         }
 
 
@@ -233,7 +239,7 @@ export class ProductService {
 
 
         // Ensure vendor exists before checking ownership
-        if (user.id !== userId || product.vendor.role !== "admin") {
+        if (user.role !== 'admin' && product.vendor.id !== user.id) {
             throw new ForbiddenException(`You are not authorized to delete this product`);
         }
 

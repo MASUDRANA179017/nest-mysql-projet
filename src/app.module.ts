@@ -30,6 +30,7 @@ import { PosModule } from './pos/pos.module';
 import { PosSession } from "./entity/pos-session.entity";
 import { PosTransaction } from "./entity/pos-transaction.entity";
 import { BarcodeModule } from './barcode/barcode.module';
+import { SeederModule } from './seeder/seeder.module';
 
 @Module({
   imports: [
@@ -39,7 +40,7 @@ import { BarcodeModule } from './barcode/barcode.module';
       port: 3306,
       username: "root",
       password: "",
-      database: "qbit_ecommerce",
+      database: "nest_ecommerce",
       entities: [User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction],
       synchronize: true,
     }),
@@ -57,6 +58,7 @@ import { BarcodeModule } from './barcode/barcode.module';
     InvoiceModule,
     PosModule,
     BarcodeModule,
+    SeederModule,
   ],
   controllers: [AppController],
   providers: [AppService],

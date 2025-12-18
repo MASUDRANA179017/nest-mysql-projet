@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import {
   ArrayNotEmpty,
   IsArray,
+  IsBoolean,
   IsDateString,
   IsNotEmpty,
   IsNumber,
@@ -60,6 +61,11 @@ export class UpdateProductDto {
   @IsNumber()
   @IsOptional()
   weightUnitId?: number;
+
+  @ApiProperty({ description: "Is this a service?", example: true, required: false })
+  @IsOptional()
+  @IsBoolean()
+  isService?: boolean;
 
   @ApiProperty({
     description: "Thumbnail image URL",

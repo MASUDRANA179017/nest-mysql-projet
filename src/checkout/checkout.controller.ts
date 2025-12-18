@@ -12,14 +12,11 @@ export class CheckoutController {
     @Post('create')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Create a new coupon' })
-    @ApiResponse({ status: 201, description: 'Coupon created successfully.' })
+    @ApiOperation({ summary: 'Create a new order' })
+    @ApiResponse({ status: 201, description: 'Order created successfully.' })
     @ApiResponse({ status: 400, description: 'Bad request.' })
-    @ApiResponse({ status: 401, description: 'Unauthorized. rana' })
-    @ApiResponse({ status: 403, description: 'You are not the store owner' })
-    @ApiResponse({ status: 404, description: 'Store, Product or Category not found.' })
+    @ApiResponse({ status: 401, description: 'Unauthorized.' })
     @ApiResponse({ status: 500, description: 'Internal server error.' })
-
     async createOrder(@Body() createOrderDto: CreateOrderDto, @Request() req: any) {
         return this.checkoutService.createOrder(createOrderDto, req.user.id);
     }
@@ -28,10 +25,10 @@ export class CheckoutController {
     @Get('all-order')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: "Get all coupon code" })
-    @ApiResponse({ status: 201, description: "All Coupon code get successfully" })
+    @ApiOperation({ summary: "Get all orders" })
+    @ApiResponse({ status: 200, description: "All orders retrieved successfully" })
     @ApiResponse({ status: 400, description: "Bad Request" })
-    async getCoupon() {
+    async getAllOrders() {
         return this.checkoutService.getAllOrders();
     }
 }

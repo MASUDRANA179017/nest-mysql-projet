@@ -7,8 +7,10 @@ import { User } from 'src/entity/user.entity';
 import { Product } from 'src/entity/product.entity';
 
 
+import { Category } from 'src/entity/category.entity';
+
 @Module({
-  imports: [ TypeOrmModule.forFeature([Store, User, Product]) ],
+  imports: [ TypeOrmModule.forFeature([Store, User, Product, Category]) ],
   controllers: [StoreController],
   providers: [StoreService]
 })

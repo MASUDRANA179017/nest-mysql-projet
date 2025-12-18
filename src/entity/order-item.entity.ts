@@ -15,6 +15,9 @@ export class OrderItem {
   @Column()
   totalPrice: number;
 
+  @Column({ type: 'datetime', nullable: true })
+  serviceDate: Date | null;
+
   @ManyToOne(() => Order, (order) => order.items)
   order: Order;
 }

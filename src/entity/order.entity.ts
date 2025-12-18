@@ -7,7 +7,7 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.OrderItem)
+  @ManyToOne(() => User, (user) => user.orders)
   user: User;
 
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
@@ -18,6 +18,9 @@ export class Order {
 
   @Column()
   shippingAddress: string;
+
+  @Column({ default: 'Pending' })
+  status: string;
 
   @CreateDateColumn()
   createdAt: Date;

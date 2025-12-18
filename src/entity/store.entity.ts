@@ -4,6 +4,8 @@ import { User } from "./user.entity";
 import { Coupon } from "./coupon.entity";
 import { Prescription } from "./prescription.entity";
 
+import { Category } from "./category.entity";
+
 @Entity()
 export class Store {
     @PrimaryGeneratedColumn()
@@ -18,6 +20,12 @@ export class Store {
     @Column({ nullable: true })
     imageUrl: string;
 
+    @Column({ nullable: true })
+    address: string;
+
+    @Column({ nullable: true })
+    city: string;
+
     @ManyToOne(() => User, (user) => user.stores)
     owner: User;
 
@@ -29,4 +37,7 @@ export class Store {
 
     @OneToMany(() => Coupon, (coupon) => coupon.store)
     coupons: Coupon[];
+
+    @ManyToOne(() => Category, (category) => category.stores, { nullable: true })
+    category: Category;
 }

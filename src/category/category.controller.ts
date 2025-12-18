@@ -75,13 +75,7 @@ export class CategoryController {
     })
     async getById(@Param('id') id: string) {
         const categoryId = parseInt(id);
-        return this.categoryService.getAllCategories().then(categories => {
-            const category = categories.find(cat => cat.id === categoryId);
-            if (!category) {
-                throw new Error(`Category with ID ${categoryId} not found`);
-            }
-            return category;
-        });
+        return this.categoryService.getCategoryById(categoryId);
     }
 
 

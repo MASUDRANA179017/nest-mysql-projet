@@ -18,5 +18,13 @@ export class CreateCategoryDto {
     @IsString()
     @IsOptional()
     description: string;
+
+    @ApiProperty({
+        description: "The parent category ID (for sub-categories)",
+        example: 1,
+        required: false
+    })
+    @IsOptional()
+    parentId: number;
     
 }

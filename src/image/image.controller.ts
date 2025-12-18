@@ -77,9 +77,13 @@ export class ImageController {
     }),
   )
   async uploadImage(
-    @UploadedFile() file: File,
+    @UploadedFile() file: Express.Multer.File,
     @Query('folder') folder?: string, 
   ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
     const allowedFolders: UploadFolder[] = ['profiles', 'stores', 'products', 'default'];
     const safeFolder: UploadFolder = allowedFolders.includes(folder as UploadFolder)
       ? (folder as UploadFolder)

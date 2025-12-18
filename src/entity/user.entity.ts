@@ -35,6 +35,6 @@ export class User {
     @OneToMany(() => Prescription, (prescription) => prescription.owner)
     prescription: Prescription[];
 
-    @OneToMany(() => Order, (order) => order.items)
-    OrderItem: Order[];
+    @OneToMany(() => Order, (order) => order.user)
+    orders: Order[];
 }

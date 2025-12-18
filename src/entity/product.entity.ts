@@ -33,6 +33,9 @@ export class Product {
     expireDate: Date;
 
 
+    @Column({ default: false })
+    isService: boolean;
+
     @Column({ nullable: true })
     productThumbnail: string;
     
@@ -48,14 +51,14 @@ export class Product {
     @ManyToOne(() => Store, (store) => store.id)
     store: Store;
     
-    @ManyToOne(() => WeightUnit, (weightUnit) => weightUnit.product)
-    weightUnit: WeightUnit;
+    @ManyToOne(() => WeightUnit, (weightUnit) => weightUnit.product, { nullable: true })
+    weightUnit: WeightUnit | null;
 
     @ManyToOne(() => Category, (category) => category.product)
     category: Category;
     
-    @ManyToOne(() => Brand, (brand) => brand.product)
-    brand: Brand;
+    @ManyToOne(() => Brand, (brand) => brand.product, { nullable: true })
+    brand: Brand | null;
 
     @ManyToOne(() => Prescription, (prescription) => prescription.products)
     prescription: Prescription[];
