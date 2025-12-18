@@ -7,6 +7,7 @@ import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Product } from 'src/entity/product.entity';
+import { StoreService } from 'src/store/store.service';
 
 @Injectable()
 export class CheckoutService {
@@ -15,6 +16,7 @@ export class CheckoutService {
         @InjectRepository(OrderItem) private itemRepository: Repository<OrderItem>,
         @InjectRepository(User) private userRepository: Repository<User>,
         @InjectRepository(Product) private productRepository: Repository<Product>,
+        private storeService: StoreService,
     ) { }
 
     async createOrder(createOrderDto: CreateOrderDto, userId: number) {
@@ -28,11 +30,12 @@ export class CheckoutService {
         let totalAmount = 0;
 
         const orderItems: OrderItem[] = [];
+        const storeGroups: Record<number, { store: any, items: any[] }> = {};
 
         for (const item of createOrderDto.items) {
             const { productId, quantity } = item;
 
-            const product = await this.productRepository.findOne({ where: { id: Number(productId) } });
+            const product = await this.productRepository.findOne({ where: { id: Number(productId) }, relations: ['store', 'store.owner'] });
             if (!product) throw new NotFoundException(`Product with ID ${productId} not found`);
             const productPrice = product.price;
             const totalPrice = productPrice * quantity;
@@ -46,6 +49,14 @@ export class CheckoutService {
             });
                
             orderItems.push(orderItem);
+
+            // Group for email
+            if (product.store) {
+                 if (!storeGroups[product.store.id]) {
+                     storeGroups[product.store.id] = { store: product.store, items: [] };
+                 }
+                 storeGroups[product.store.id].items.push({ name: product.name, quantity, price: totalPrice });
+            }
         }
 
 
@@ -61,11 +72,44 @@ export class CheckoutService {
         orderItems.forEach(item => item.order = savedOrder);
         await this.itemRepository.save(orderItems);
 
+        // Send Emails (Async)
+        this.sendOrderEmails(storeGroups, user).catch(err => console.error("Failed to send order emails", err));
+
         return {
             message: 'Order placed successfully',
             order: savedOrder,
             items: orderItems,
         };
+    }
+
+    private async sendOrderEmails(storeGroups: any, user: User) {
+        for (const storeId in storeGroups) {
+            const group = storeGroups[storeId];
+            const store = group.store;
+            const itemsList = group.items.map(i => `- ${i.name} (x${i.quantity}): ${i.price}`).join('\n');
+            
+            // Customer Email
+            try {
+                await this.storeService.sendStoreEmailInternal(
+                    store.id,
+                    user.email,
+                    `Order Confirmation - ${store.name}`,
+                    `Hello ${user.firstName},\n\nThank you for your order from ${store.name}.\n\nItems:\n${itemsList}\n\nTotal: ${group.items.reduce((s, i) => s + i.price, 0)}\n\nBest regards,\n${store.name}`
+                );
+            } catch (e) { console.error(`Failed to send customer email for store ${store.id}`, e); }
+
+            // Vendor Email
+             try {
+                if (store.owner && store.owner.email) {
+                    await this.storeService.sendStoreEmailInternal(
+                        store.id,
+                        store.owner.email,
+                        `New Order Received - ${store.name}`,
+                        `Hello ${store.owner.firstName},\n\nYou have a new order from ${user.firstName} ${user.lastName} (${user.email}).\n\nItems:\n${itemsList}\n\nPlease check your dashboard for details.`
+                    );
+                }
+            } catch (e) { console.error(`Failed to send vendor email for store ${store.id}`, e); }
+        }
     }
 
     async getAllOrders(): Promise<Order[]> {

@@ -27,6 +27,15 @@ export class CreateStoreDto {
     @IsString()
     imageUrl: string;
 
+    @ApiProperty({
+        description: "Store Cover Image URL",
+        example: "https://example.com/store-cover.jpg",
+        required: false
+    })
+    @IsOptional()
+    @IsString()
+    coverImage: string;
+
     @ApiProperty({ description: "Address", example: "123 Main St", required: false })
     @IsOptional()
     @IsString()

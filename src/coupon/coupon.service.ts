@@ -163,7 +163,7 @@ export class CouponService {
         }
     } else if (coupon.scope === 'PRODUCT') {
         // Calculate discount only for applicable products
-        const applicableProductIds = coupon.products.map(p => p.id);
+        const applicableProductIds = coupon.products?.map(p => p.id) || [];
         let applicableTotal = 0;
         
         items.forEach(item => {
@@ -188,7 +188,7 @@ export class CouponService {
             relations: ['category']
         });
 
-        const applicableCategoryIds = coupon.categories.map(c => c.id);
+        const applicableCategoryIds = coupon.categories?.map(c => c.id) || [];
         let applicableTotal = 0;
 
         items.forEach(item => {

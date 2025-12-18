@@ -1,6 +1,6 @@
 import { Category } from 'src/entity/category.entity';
 import { Product } from 'src/entity/product.entity';
-import { ForbiddenException, Get, Injectable, Param, UseGuards } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Get, Injectable, Param, UseGuards } from '@nestjs/common';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Store } from 'src/entity/store.entity';
@@ -188,26 +188,46 @@ export class StoreService {
         if (store.owner.id !== userId) {
             throw new Error('You are not authorized to send mail for this store');
         }
+        
+        return this.sendStoreEmailInternal(storeId, to, subject, text, html);
+    }
+
+    // Internal method for system to send email using store's SMTP (e.g. Order Confirmation)
+    async sendStoreEmailInternal(storeId: number, to: string, subject: string, text: string, html?: string) {
+        const store = await this.storeRepository.findOne({ where: { id: storeId } });
+        if (!store) {
+             throw new Error('Store not found');
+        }
+        
         if (!store.smtpHost || !store.smtpPort || !store.smtpUser || !store.smtpPass || !store.smtpFrom) {
             throw new Error('SMTP settings are not configured');
         }
-        const transporter = nodemailer.createTransport({
-            host: store.smtpHost,
-            port: Number(store.smtpPort),
-            secure: Boolean(store.smtpSecure),
-            auth: {
-                user: store.smtpUser,
-                pass: store.smtpPass,
-            },
-        });
-        const info = await transporter.sendMail({
-            from: store.smtpFrom,
-            to,
-            subject,
-            text,
-            html,
-        });
-        return { messageId: info.messageId, accepted: info.accepted, rejected: info.rejected };
+
+        try {
+            const transporter = nodemailer.createTransport({
+                host: store.smtpHost,
+                port: Number(store.smtpPort),
+                secure: Boolean(store.smtpSecure),
+                auth: {
+                    user: store.smtpUser,
+                    pass: store.smtpPass,
+                },
+            });
+
+            await transporter.verify();
+
+            const info = await transporter.sendMail({
+                from: store.smtpFrom,
+                to,
+                subject,
+                text,
+                html,
+            });
+            
+            return { messageId: info.messageId, accepted: info.accepted, rejected: info.rejected };
+        } catch (e: any) {
+            throw new BadRequestException(e?.message || 'Failed to send SMTP email');
+        }
     }
 
 

@@ -21,6 +21,9 @@ export class Store {
     imageUrl: string;
 
     @Column({ nullable: true })
+    coverImage: string;
+
+    @Column({ nullable: true })
     address: string;
 
     @Column({ nullable: true })

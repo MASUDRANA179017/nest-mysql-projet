@@ -1,60 +1,54 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UpdateStoreDto {
-    @ApiProperty({
-        description: "The name of the store",
-        example: "My Updated Store",
-        required: false
-    })
+    @ApiProperty({ description: "Store name", required: false })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     name?: string;
 
-    @ApiProperty({
-        description: "A brief description of the store",
-        example: "This store now sells even more awesome products.",
-        required: false
-    })
+    @ApiProperty({ description: "Store description", required: false })
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     description?: string;
-    @ApiProperty({
-        description: "Store Image URL",
-        example: "https://example.com/updated-store-image.jpg",
-        required: false
-    })
+
+    @ApiProperty({ description: "Store Image URL", required: false })
     @IsString()
+    @IsOptional()
     imageUrl?: string;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ description: "Store Cover Image URL", required: false })
+    @IsString()
+    @IsOptional()
+    coverImage?: string;
+
+    @ApiProperty({ description: "SMTP Host", required: false })
     @IsString()
     @IsOptional()
     smtpHost?: string;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ description: "SMTP Port", required: false })
     @IsNumber()
     @IsOptional()
     smtpPort?: number;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ description: "SMTP User", required: false })
     @IsString()
     @IsOptional()
     smtpUser?: string;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ description: "SMTP Password", required: false })
     @IsString()
     @IsOptional()
     smtpPass?: string;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ description: "SMTP Secure", required: false })
     @IsBoolean()
     @IsOptional()
     smtpSecure?: boolean;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ description: "SMTP From Email", required: false })
     @IsString()
     @IsOptional()
     smtpFrom?: string;
 }
-
