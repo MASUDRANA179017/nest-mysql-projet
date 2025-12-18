@@ -44,6 +44,25 @@ export class StoreController {
         return this.storeService.getAll(req.user.id);
     }
 
+    @Get("public/all")
+    @ApiOperation({ summary: 'Get all public stores' })
+    @ApiResponse({
+        status: 200,
+        description: 'Returns an array of stores',
+    })
+    async getAllPublicStores() {
+        return this.storeService.getAllPublic();
+    }
+
+    @Get("public/:id")
+    @ApiOperation({ summary: 'Get public store by ID' })
+    @ApiResponse({
+        status: 200,
+        description: 'Returns the store with the specified ID',
+    })
+    async getPublicStoreById(@Param('id') id: string) {
+        return this.storeService.getStoreById(+id);
+    }
 
     @Get('getSingleStore/:id')
     @UseGuards(JwtAuthGuard)

@@ -97,6 +97,13 @@ export class ProductService {
 
     }
 
+    async getProductsByStoreId(storeId: number): Promise<Product[]> {
+        return this.productRepository.find({
+            where: { store: { id: storeId } },
+            relations: ['vendor', 'store', 'weightUnit', 'category', 'reviews'],
+        });
+    }
+
     async getProductById(id: string): Promise<Product> {
         const product = await this.productRepository.findOne({ where: { id: Number(id) }, relations: ['vendor', 'store', 'category', 'reviews'] });
         // const user = await this.userRepository.findOne({ where: { id: userId } });

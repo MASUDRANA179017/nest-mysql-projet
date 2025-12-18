@@ -129,8 +129,17 @@ export class CouponService {
     return this.couponRepository.save(coupon);
   }
 
-  async getAllCoupons(): Promise<Coupon[]> {
-    return this.couponRepository.find({ relations: ['store', 'products', 'categories'] });
+  async getAllCoupons(userId: number): Promise<Coupon[]> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (user?.role === 'admin') {
+      return this.couponRepository.find({ relations: ['store', 'products', 'categories'] });
+    } else {
+      return this.couponRepository.find({
+        where: { store: { owner: { id: userId } } },
+        relations: ['store', 'products', 'categories']
+      });
+    }
   }
 
   async getCouponById(id: number): Promise<Coupon> {

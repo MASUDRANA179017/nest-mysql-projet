@@ -15,12 +15,6 @@ export class SeederService implements OnModuleInit {
     }
 
     private async seedCategories() {
-        const count = await this.categoryRepository.count();
-        if (count > 0) {
-            console.log('Categories already seeded.');
-            return;
-        }
-
         const categories = [
             {
                 name: 'Safety & Emergency Services',
@@ -114,21 +108,37 @@ export class SeederService implements OnModuleInit {
         console.log('Seeding categories...');
 
         for (const catData of categories) {
-            // Create Parent
-            const parent = this.categoryRepository.create({
-                name: catData.name,
-                description: catData.name,
-            });
-            const savedParent = await this.categoryRepository.save(parent);
+            // Check if Parent exists
+            let parent = await this.categoryRepository.findOne({ where: { name: catData.name } });
+
+            if (!parent) {
+                parent = this.categoryRepository.create({
+                    name: catData.name,
+                    description: catData.name,
+                });
+                parent = await this.categoryRepository.save(parent);
+                console.log(`Created parent category: ${catData.name}`);
+            }
 
             // Create Children
             for (const subName of catData.subcategories) {
-                const child = this.categoryRepository.create({
-                    name: subName,
-                    description: subName,
-                    parent: savedParent,
+                // Check if Child exists under this parent
+                const childExists = await this.categoryRepository.findOne({ 
+                    where: { 
+                        name: subName, 
+                        parent: { id: parent.id } 
+                    } 
                 });
-                await this.categoryRepository.save(child);
+
+                if (!childExists) {
+                    const child = this.categoryRepository.create({
+                        name: subName,
+                        description: subName,
+                        parent: parent,
+                    });
+                    await this.categoryRepository.save(child);
+                    console.log(`Created subcategory: ${subName}`);
+                }
             }
         }
 

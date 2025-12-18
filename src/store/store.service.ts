@@ -78,8 +78,22 @@ export class StoreService {
         );
     }
 
+    // Public method to get all stores
+    async getAllPublic(): Promise<(Store & { averageRating: number })[]> {
+        const stores = await this.storeRepository.find({
+            relations: ['owner', 'category'],
+        });
+
+        return Promise.all(
+            stores.map(async (store) => {
+                const averageRating = await this.calculateStoreReview(Number(store.id));
+                return { ...store, averageRating };
+            })
+        );
+    }
 
     async getStoreById(id: Number): Promise<Store> {
+
         const store = await this.storeRepository.findOne({
             where: { id: Number(id) },
             relations: ['owner', 'category']

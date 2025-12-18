@@ -38,20 +38,10 @@ export class CategoryController {
 
 
     @Get('/all')
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
     @ApiOperation({ summary: 'Get all categories' })
     @ApiResponse({
         status: 200,
         description: 'List of all categories',
-    })
-    @ApiResponse({
-        status: 403,
-        description: 'Forbidden',
-    })
-    @ApiResponse({
-        status: 401,
-        description: 'Unauthorized',
     })
     async getAll() {
         return this.categoryService.getAllCategories();

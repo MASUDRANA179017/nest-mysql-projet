@@ -51,6 +51,16 @@ export class ProductController {
     return this.productService.getAllProducts();
   }
 
+  @Get("store/:storeId")
+  @ApiOperation({ summary: "Get all products by store ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Products retrieved successfully",
+  })
+  async getProductsByStoreId(@Param("storeId") storeId: string) {
+    return this.productService.getProductsByStoreId(+storeId);
+  }
+
   @Get("vendorProduct")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

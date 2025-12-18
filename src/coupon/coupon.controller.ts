@@ -31,8 +31,8 @@ export class CouponController {
     @ApiOperation({ summary: "Get all coupon code" })
     @ApiResponse({ status: 201, description: "All Coupon code get successfully" })
     @ApiResponse({ status: 400, description: "Bad Request" })
-    async getCoupon() {
-        return this.couponService.getAllCoupons();
+    async getCoupon(@Request() req: any) {
+        return this.couponService.getAllCoupons(req.user.id);
     }
     @Get('getById/:id')
     @UseGuards(JwtAuthGuard)

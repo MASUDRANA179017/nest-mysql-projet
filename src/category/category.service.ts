@@ -2,7 +2,7 @@ import { Category } from 'src/entity/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 
 @Injectable()
 export class CategoryService {
@@ -24,7 +24,10 @@ export class CategoryService {
     }
 
     async getAllCategories(): Promise<Category[]> {
-        return this.categoryRepository.find({ relations: ['children'] });
+        return this.categoryRepository.find({ 
+            where: { parent: IsNull() },
+            relations: ['children'] 
+        });
     }
 
     async getCategoryById(id: number): Promise<Category> {
