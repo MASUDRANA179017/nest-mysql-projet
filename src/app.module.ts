@@ -33,7 +33,10 @@ import { BarcodeModule } from './barcode/barcode.module';
 import { SeederModule } from './seeder/seeder.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { WalletModule } from './wallet/wallet.module';
+import { Blog } from "./entity/blog.entity";
+import { BlogModule } from "./blog/blog.module";
 import { WalletTransaction } from "./entity/wallet-transaction.entity";
+
 
 @Module({
   imports: [
@@ -44,7 +47,7 @@ import { WalletTransaction } from "./entity/wallet-transaction.entity";
       username: "root",
       password: "",
       database: "nest_ecommerce",
-      entities: [User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction, WalletTransaction],
+      entities: [User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction, WalletTransaction, Blog],
       synchronize: true,
     }),
     AuthModule,
@@ -59,11 +62,13 @@ import { WalletTransaction } from "./entity/wallet-transaction.entity";
     WeightUnitModule,
     PrescriptionModule,
     InvoiceModule,
+    InvoiceModule,
     PosModule,
     BarcodeModule,
     SeederModule,
     DashboardModule,
     WalletModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [AppService],
