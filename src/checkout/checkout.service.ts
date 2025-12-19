@@ -37,6 +37,26 @@ export class CheckoutService {
 
             const product = await this.productRepository.findOne({ where: { id: Number(productId) }, relations: ['store', 'store.owner'] });
             if (!product) throw new NotFoundException(`Product with ID ${productId} not found`);
+
+            // Check for double booking if serviceDate is present
+            if (item.serviceDate) {
+                const serviceDate = new Date(item.serviceDate);
+                // Create a small window to handle potential ms differences
+                const start = new Date(serviceDate.getTime() - 1000);
+                const end = new Date(serviceDate.getTime() + 1000);
+
+                const existingBooking = await this.itemRepository.createQueryBuilder("item")
+                    .leftJoin("item.order", "order")
+                    .where("item.productId = :productId", { productId: Number(productId) })
+                    .andWhere("item.serviceDate BETWEEN :start AND :end", { start, end })
+                    .andWhere("order.status NOT IN (:...statuses)", { statuses: ['Cancelled', 'Rejected'] })
+                    .getOne();
+
+                if (existingBooking) {
+                    throw new ForbiddenException(`Service slot for ${product.name} at ${serviceDate.toLocaleString()} is already booked.`);
+                }
+            }
+
             const productPrice = product.price;
             const totalPrice = productPrice * quantity;
             totalAmount += totalPrice;
@@ -83,6 +103,30 @@ export class CheckoutService {
             order: savedOrder,
             items: orderItems,
         };
+    }
+
+    async getAvailability(productId: number, date: string) {
+        const start = new Date(`${date}T00:00:00`);
+        const end = new Date(`${date}T23:59:59`);
+        const items = await this.itemRepository.createQueryBuilder("item")
+            .leftJoin("item.order", "order")
+            .where("item.productId = :productId", { productId: Number(productId) })
+            .andWhere("item.serviceDate BETWEEN :start AND :end", { start, end })
+            .andWhere("order.status NOT IN (:...statuses)", { statuses: ['Cancelled', 'Rejected'] })
+            .getMany();
+        const times = items
+            .filter(i => i.serviceDate)
+            .map(i => {
+                const d = new Date(i.serviceDate as Date);
+                let h = d.getHours();
+                const m = d.getMinutes();
+                const ap = h >= 12 ? 'PM' : 'AM';
+                h = h % 12;
+                if (h === 0) h = 12;
+                const pad = (n: number) => String(n).padStart(2, '0');
+                return `${pad(h)}:${pad(m)} ${ap}`;
+            });
+        return { date, productId, bookedTimes: Array.from(new Set(times)) };
     }
 
     private async sendOrderEmails(storeGroups: any, user: User) {

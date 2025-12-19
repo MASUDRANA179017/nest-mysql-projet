@@ -1,5 +1,5 @@
 import { CheckoutService } from './checkout.service';
-import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/jwt-auth.guard';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -52,5 +52,15 @@ export class CheckoutController {
     ) {
         console.log(`[Controller] Updating Order ID: ${id} to Status: ${status}`);
         return this.checkoutService.updateOrderStatus(id, status);
+    }
+
+    @Get('availability')
+    @ApiOperation({ summary: "Get booked times for a product on a date" })
+    @ApiResponse({ status: 200, description: "Booked times retrieved successfully" })
+    async getAvailability(
+        @Query('productId', ParseIntPipe) productId: number,
+        @Query('date') date: string
+    ) {
+        return this.checkoutService.getAvailability(productId, date);
     }
 }
