@@ -184,7 +184,7 @@ export class CategoryService {
 
         return this.categoryRepository.find({
             where: { store: { id: store.id } },
-            relations: ['children']
+            relations: ['children', 'parent']
         });
     }
 }
