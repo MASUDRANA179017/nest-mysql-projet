@@ -72,6 +72,15 @@ export class UpdateProductDto {
   @IsBoolean()
   isService?: boolean;
 
+  @ApiProperty({ description: "Is product available?", example: true, required: false })
+  @IsOptional()
+  @IsBoolean()
+  isAvailable?: boolean;
+
+  @ApiProperty({ description: "Service schedule", required: false })
+  @IsOptional()
+  schedule?: any;
+
   @ApiProperty({
     description: "Thumbnail image URL",
     example: "http://localhost:8000/uploads/products/thumbnail.jpg",

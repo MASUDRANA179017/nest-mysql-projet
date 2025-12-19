@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, Min, IsArray, ArrayNotEmpty, IsDateString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, Min, IsArray, ArrayNotEmpty, IsDateString, ValidateIf } from "class-validator";
 
 export class CreateProductDto {
   
@@ -19,9 +19,10 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({ description: "Product stock", example: 100 })
+  @ValidateIf((o) => !o.isService)
   @IsNotEmpty()
   @Min(0)
-  stock: number;
+  stock?: number;
 
   @ApiProperty({ description: "Product barcode", example: "123456789", required: false })
   @IsOptional()
@@ -57,6 +58,14 @@ export class CreateProductDto {
   @ApiProperty({ description: "Is this a service?", example: true, required: false })
   @IsOptional()
   isService?: boolean;
+
+  @ApiProperty({ description: "Is product available?", example: true, required: false })
+  @IsOptional()
+  isAvailable?: boolean;
+
+  @ApiProperty({ description: "Service schedule", required: false })
+  @IsOptional()
+  schedule?: any;
 
   @ApiProperty({
     description: "Thumbnail image URL",

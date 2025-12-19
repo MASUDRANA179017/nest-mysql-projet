@@ -36,6 +36,12 @@ export class Product {
     @Column({ default: false })
     isService: boolean;
 
+    @Column({ default: true })
+    isAvailable: boolean;
+
+    @Column("simple-json", { nullable: true })
+    schedule: any;
+
     @Column({ nullable: true })
     barcode: string;
 

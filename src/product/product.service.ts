@@ -77,6 +77,7 @@ export class ProductService {
         const product = this.productRepository.create(
             {
                 ...productData,
+                stock: productData.stock ?? 0,
                 vendor: user,
                 store,
                 weightUnit,
@@ -87,6 +88,163 @@ export class ProductService {
 
         return this.productRepository.save(product);
     }
+
+    async updateService(
+        id: string,
+        updateProductDto: UpdateProductDto,
+        userId: number
+    ): Promise<Product> {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (!user) {
+            throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+
+        const product = await this.productRepository.findOne({
+            where: { id: Number(id) },
+            relations: ['store', 'vendor', 'category'],
+        });
+
+        if (!product) {
+            throw new NotFoundException(`Product with ID ${id} not found`);
+        }
+
+        // Check for duplicate name
+        if (updateProductDto.name && product.name !== updateProductDto.name) {
+            const existingProduct = await this.productRepository.findOne({
+                where: { name: updateProductDto.name },
+            });
+            if (existingProduct && existingProduct.id !== product.id) {
+                throw new ConflictException(
+                    `Product with name "${updateProductDto.name}" already exists.`
+                );
+            }
+        }
+
+        // Handle Thumbnail update
+        if (updateProductDto.productThumbnail && updateProductDto.productThumbnail !== product.productThumbnail) {
+            if (product.productThumbnail) {
+                await this.imageService.deleteImage(product.productThumbnail, 'products');
+            }
+            product.productThumbnail = updateProductDto.productThumbnail;
+        }
+
+        // Handle Gallery update
+        if (updateProductDto.productGallery) {
+            const removedImages = product.productGallery?.filter(
+                (img) => !updateProductDto.productGallery?.includes(img)
+            ) || [];
+            for (const imgUrl of removedImages) {
+                await this.imageService.deleteImage(imgUrl, 'products');
+            }
+            product.productGallery = updateProductDto.productGallery;
+        }
+
+        // Update Service specific fields
+        product.name = updateProductDto.name ?? product.name;
+        product.description = updateProductDto.description ?? product.description;
+        product.price = updateProductDto.price ?? product.price;
+        product.schedule = updateProductDto.schedule ?? product.schedule;
+        product.isAvailable = updateProductDto.isAvailable ?? product.isAvailable;
+
+        // Update relations safely
+        if (updateProductDto.storeId) {
+            const store = await this.storeRepository.findOne({ where: { id: updateProductDto.storeId } });
+            if (store) product.store = store;
+        }
+
+        if (updateProductDto.categoryId) {
+            const category = await this.categoryRepository.findOne({ where: { id: updateProductDto.categoryId } });
+            if (category) product.category = category;
+        }
+
+        return this.productRepository.save(product);
+    }
+
+    async updatePhysicalProduct(
+        id: string,
+        updateProductDto: UpdateProductDto,
+        userId: number
+    ): Promise<Product> {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (!user) {
+            throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+
+        const product = await this.productRepository.findOne({
+            where: { id: Number(id) },
+            relations: ['store', 'vendor', 'category', 'brand', 'weightUnit'],
+        });
+
+        if (!product) {
+            throw new NotFoundException(`Product with ID ${id} not found`);
+        }
+
+        // Check for duplicate name
+        if (updateProductDto.name && product.name !== updateProductDto.name) {
+            const existingProduct = await this.productRepository.findOne({
+                where: { name: updateProductDto.name },
+            });
+            if (existingProduct && existingProduct.id !== product.id) {
+                throw new ConflictException(
+                    `Product with name "${updateProductDto.name}" already exists.`
+                );
+            }
+        }
+
+        // Handle Thumbnail update
+        if (updateProductDto.productThumbnail && updateProductDto.productThumbnail !== product.productThumbnail) {
+            if (product.productThumbnail) {
+                await this.imageService.deleteImage(product.productThumbnail, 'products');
+            }
+            product.productThumbnail = updateProductDto.productThumbnail;
+        }
+
+        // Handle Gallery update
+        if (updateProductDto.productGallery) {
+            const removedImages = product.productGallery?.filter(
+                (img) => !updateProductDto.productGallery?.includes(img)
+            ) || [];
+            for (const imgUrl of removedImages) {
+                await this.imageService.deleteImage(imgUrl, 'products');
+            }
+            product.productGallery = updateProductDto.productGallery;
+        }
+
+        // Update Physical Product specific fields
+        product.name = updateProductDto.name ?? product.name;
+        product.description = updateProductDto.description ?? product.description;
+        product.price = updateProductDto.price ?? product.price;
+        product.stock = updateProductDto.stock ?? product.stock;
+        product.manufactureDate = updateProductDto.manufactureDate ?? product.manufactureDate;
+        product.expireDate = updateProductDto.expireDate ?? product.expireDate;
+        product.barcode = updateProductDto.barcode ?? product.barcode;
+        product.isAvailable = updateProductDto.isAvailable ?? product.isAvailable;
+
+        // Update relations safely
+        if (updateProductDto.storeId) {
+            const store = await this.storeRepository.findOne({ where: { id: updateProductDto.storeId } });
+            if (store) product.store = store;
+        }
+
+        if (updateProductDto.categoryId) {
+            const category = await this.categoryRepository.findOne({ where: { id: updateProductDto.categoryId } });
+            if (category) product.category = category;
+        }
+
+        if (updateProductDto.brandId) {
+            const brand = await this.brandRepository.findOne({ where: { id: updateProductDto.brandId } });
+            if (brand) product.brand = brand;
+        }
+
+        if (updateProductDto.weightUnitId) {
+            const weightUnit = await this.weightUnitRepository.findOne({ where: { id: updateProductDto.weightUnitId } });
+            if (weightUnit) product.weightUnit = weightUnit;
+        }
+
+        return this.productRepository.save(product);
+    }
+
+
 
     async getAllProducts(type?: string): Promise<Product[]> {
 
@@ -201,6 +359,9 @@ export class ProductService {
         product.stock = updateProductDto.stock ?? product.stock;
         product.manufactureDate = updateProductDto.manufactureDate ?? product.manufactureDate;
         product.expireDate = updateProductDto.expireDate ?? product.expireDate;
+        product.schedule = updateProductDto.schedule ?? product.schedule;
+        product.isAvailable = updateProductDto.isAvailable ?? product.isAvailable;
+        product.barcode = updateProductDto.barcode ?? product.barcode;
 
         // Update relations safely
         if (updateProductDto.storeId) {

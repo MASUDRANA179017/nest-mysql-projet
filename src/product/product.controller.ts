@@ -126,6 +126,22 @@ export class ProductController {
   }
 
 
+  @Put("update/service/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update Service by ID" })
+  async updateService(@Param("id") id: string, @Body() updateProductDto: UpdateProductDto, @Request() req: any) {
+    return this.productService.updateService(id, updateProductDto, req.user.id);
+  }
+
+  @Put("update/product/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update Physical Product by ID" })
+  async updatePhysicalProduct(@Param("id") id: string, @Body() updateProductDto: UpdateProductDto, @Request() req: any) {
+    return this.productService.updatePhysicalProduct(id, updateProductDto, req.user.id);
+  }
+
   @Put("update/:id")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
