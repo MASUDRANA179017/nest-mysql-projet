@@ -20,6 +20,15 @@ export class CreateCategoryDto {
     description: string;
 
     @ApiProperty({
+        description: "The type of the category ('store' or 'product')",
+        example: "product",
+        default: "product"
+    })
+    @IsString()
+    @IsOptional()
+    type: string;
+
+    @ApiProperty({
         description: "The parent category ID (for sub-categories)",
         example: 1,
         required: false

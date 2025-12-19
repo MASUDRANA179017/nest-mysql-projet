@@ -84,6 +84,16 @@ export class CategoryController {
         return this.categoryService.getAllCategories();
     }
 
+    @Get('/type/:type')
+    @ApiOperation({ summary: 'Get categories by type (store or product)' })
+    @ApiResponse({
+        status: 200,
+        description: 'List of categories by type',
+    })
+    async getByType(@Param('type') type: string) {
+        return this.categoryService.getCategoriesByType(type);
+    }
+
     @Get('/store/:storeId')
     @ApiOperation({ summary: 'Get categories by store ID' })
     @ApiResponse({

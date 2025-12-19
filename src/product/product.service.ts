@@ -10,6 +10,8 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Store } from 'src/entity/store.entity';
 import { Category } from 'src/entity/category.entity';
 import { Brand } from 'src/entity/brand.entity';
+import { Review } from 'src/entity/review.entity';
+import { OrderItem } from 'src/entity/order-item.entity';
 
 
 @Injectable()
@@ -28,6 +30,10 @@ export class ProductService {
         private categoryRepository: Repository<Category>,
         @InjectRepository(Brand)
         private brandRepository: Repository<Brand>,
+        @InjectRepository(Review)
+        private reviewRepository: Repository<Review>,
+        @InjectRepository(OrderItem)
+        private orderItemRepository: Repository<OrderItem>,
     ) { }
 
     async createProduct(createProductDto: CreateProductDto, userId: number): Promise<Product> {
@@ -406,25 +412,46 @@ export class ProductService {
         if (!product) {
             throw new NotFoundException(`Product with ID ${id} not found`);
         }
-        // Delete thumbnail
-        if (product.productThumbnail) {
-            await this.imageService.deleteImage(product.productThumbnail, 'products');
-        }
 
-        // Delete gallery images
-        if (product.productGallery?.length) {
-            for (const img of product.productGallery) {
-                await this.imageService.deleteImage(img, 'products');
+        // Ensure vendor exists before checking ownership
+        if (user.role !== 'admin') {
+            if (!product.vendor || product.vendor.id !== user.id) {
+                throw new ForbiddenException(`You are not authorized to delete this product`);
             }
         }
 
+        try {
+            // Delete thumbnail
+            if (product.productThumbnail) {
+                try {
+                    await this.imageService.deleteImage(product.productThumbnail, 'products');
+                } catch (e) {
+                    console.error("Failed to delete thumbnail:", e);
+                }
+            }
 
-        // Ensure vendor exists before checking ownership
-        if (user.role !== 'admin' && product.vendor.id !== user.id) {
-            throw new ForbiddenException(`You are not authorized to delete this product`);
+            // Delete gallery images
+            if (product.productGallery?.length) {
+                for (const img of product.productGallery) {
+                    try {
+                        await this.imageService.deleteImage(img, 'products');
+                    } catch (e) {
+                        console.error("Failed to delete gallery image:", e);
+                    }
+                }
+            }
+
+            // Clean up related records (Force Delete)
+            await this.reviewRepository.delete({ product: { id: Number(id) } });
+            await this.orderItemRepository.delete({ product: { id: Number(id) } });
+
+            await this.productRepository.delete(id);
+        } catch (error) {
+            if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.code === 'ER_ROW_IS_REFERENCED') {
+                throw new ConflictException('Cannot delete product because it is referenced by other records (e.g., orders, reviews).');
+            }
+            throw new InternalServerErrorException('Failed to delete product');
         }
-
-        await this.productRepository.delete(id);
     }
 
 

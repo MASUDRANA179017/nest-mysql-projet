@@ -37,19 +37,23 @@ export class CategoryService {
 
     async getAllCategories(): Promise<Category[]> {
         return this.categoryRepository.find({ 
-            where: { parent: IsNull(), store: IsNull() },
-            relations: ['children'] 
+            where: { parent: IsNull() },
+            relations: ['children', 'store'] 
         });
     }
 
     async getCategoriesByStore(storeId: number): Promise<Category[]> {
-        // Fetch global categories (store is null) AND store specific categories
+        // Fetch only store specific categories
         return this.categoryRepository.find({
-            where: [
-                { store: { id: storeId }, parent: IsNull() },
-                { store: IsNull(), parent: IsNull() }
-            ],
+            where: { store: { id: storeId }, parent: IsNull() },
             relations: ['children']
+        });
+    }
+
+    async getCategoriesByType(type: string): Promise<Category[]> {
+        return this.categoryRepository.find({
+            where: { type, parent: IsNull() },
+            relations: ['children', 'store']
         });
     }
 
@@ -65,7 +69,11 @@ export class CategoryService {
     }
 
     async update(id: number, updateCategoryDto: CreateCategoryDto): Promise<Category> {
-        await this.categoryRepository.update(id, { name: updateCategoryDto.name, description: updateCategoryDto.description });
+        await this.categoryRepository.update(id, { 
+            name: updateCategoryDto.name, 
+            description: updateCategoryDto.description,
+            type: updateCategoryDto.type 
+        });
         const updatedCategory = await this.categoryRepository.findOne({ where: { id } });
         if (!updatedCategory) {
             throw new Error(`Category with id ${id} not found`);
@@ -89,8 +97,10 @@ export class CategoryService {
             throw new NotFoundException(`Store for user ${userId} not found`);
         }
 
+        const { storeId, ...categoryData } = createCategoryDto;
+
         const category = this.categoryRepository.create({
-            ...createCategoryDto,
+            ...categoryData,
             store: store
         });
 
@@ -119,12 +129,31 @@ export class CategoryService {
             throw new NotFoundException(`You do not have permission to update this category`);
         }
 
-        await this.categoryRepository.update(categoryId, { 
+        const updateData: any = { 
             name: updateCategoryDto.name, 
-            description: updateCategoryDto.description 
+            description: updateCategoryDto.description,
+            type: updateCategoryDto.type
+        };
+
+        if (updateCategoryDto.parentId) {
+             const parent = await this.categoryRepository.findOne({ where: { id: updateCategoryDto.parentId } });
+             if (parent) {
+                 updateData.parent = parent;
+             }
+        } else if (updateCategoryDto.parentId === null) {
+            updateData.parent = null;
+        }
+
+        await this.categoryRepository.save({
+            id: categoryId,
+            ...updateData
         });
 
-        return this.categoryRepository.findOne({ where: { id: categoryId } });
+        const updatedCategory = await this.categoryRepository.findOne({ where: { id: categoryId } });
+        if (!updatedCategory) {
+            throw new NotFoundException(`Category with id ${categoryId} not found`);
+        }
+        return updatedCategory;
     }
 
     async deleteForVendor(userId: number, categoryId: number): Promise<void> {

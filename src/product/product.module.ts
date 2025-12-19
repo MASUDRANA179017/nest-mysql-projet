@@ -9,9 +9,11 @@ import { Category } from "src/entity/category.entity";
 import { ImageService } from '../image/image.service'; 
 import { WeightUnit } from "src/entity/weight-unit.entity";
 import { Brand } from "src/entity/brand.entity";
+import { Review } from "src/entity/review.entity";
+import { OrderItem } from "src/entity/order-item.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, User, Store, WeightUnit, Category,Brand])],
+  imports: [TypeOrmModule.forFeature([Product, User, Store, WeightUnit, Category, Brand, Review, OrderItem])],
   controllers: [ProductController],
   providers: [ProductService, ImageService]
 })

@@ -15,6 +15,9 @@ export class Category {
     @Column()
     description?: string;
 
+    @Column({ default: 'product' })
+    type: string; // 'store' | 'product'
+
     @OneToMany(() => Product, (product) => product.category)
     product: Product[];
 
