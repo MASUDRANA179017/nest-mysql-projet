@@ -29,4 +29,7 @@ export class Category {
 
     @OneToMany(() => Store, (store) => store.category)
     stores: Store[];
+
+    @ManyToOne(() => Store, (store) => store.customCategories, { nullable: true, onDelete: 'CASCADE' })
+    store: Store;
 } 

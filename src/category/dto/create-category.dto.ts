@@ -26,5 +26,12 @@ export class CreateCategoryDto {
     })
     @IsOptional()
     parentId: number;
-    
+
+    @ApiProperty({
+        description: "The store ID (for vendor-specific categories)",
+        example: 1,
+        required: false
+    })
+    @IsOptional()
+    storeId?: number;
 }

@@ -64,4 +64,7 @@ export class Store {
 
     @ManyToOne(() => Category, (category) => category.stores, { nullable: true })
     category: Category;
+
+    @OneToMany(() => Category, (category) => category.store)
+    customCategories: Category[];
 }

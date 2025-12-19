@@ -69,9 +69,14 @@ export class ProductService {
             throw new ConflictException(`Product with name "${productData.name}" already exists.`);
         }
 
-        const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+        const category = await this.categoryRepository.findOne({ where: { id: categoryId }, relations: ['store'] });
         if (!category) {
             throw new NotFoundException(`Category with ID ${categoryId} not found`);
+        }
+
+        // Validate category ownership (Global or Store-specific)
+        if (category.store && category.store.id !== storeId) {
+             throw new ForbiddenException(`Category with ID ${categoryId} does not belong to this store`);
         }
 
         const product = this.productRepository.create(
