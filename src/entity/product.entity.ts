@@ -51,13 +51,13 @@ export class Product {
     @Column("simple-array", { nullable: true })
     productGallery: string[];
     
-    @ManyToOne(() => User, (user) => user.id)
+    @ManyToOne(() => User)
     vendor: User;
 
-    @ManyToMany(() => Coupon, (coupon) => coupon.id)
+    @ManyToMany(() => Coupon, (coupon) => coupon.products)
     coupons: Coupon[];
     
-    @ManyToOne(() => Store, (store) => store.id)
+    @ManyToOne(() => Store)
     store: Store;
     
     @ManyToOne(() => WeightUnit, (weightUnit) => weightUnit.product, { nullable: true })
@@ -69,7 +69,7 @@ export class Product {
     @ManyToOne(() => Brand, (brand) => brand.product, { nullable: true })
     brand: Brand | null;
 
-    @ManyToOne(() => Prescription, (prescription) => prescription.products)
+    @ManyToMany(() => Prescription, (prescription) => prescription.products)
     prescription: Prescription[];
     
     @OneToMany(() => Review, (review) => review.product)

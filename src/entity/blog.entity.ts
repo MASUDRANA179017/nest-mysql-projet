@@ -15,7 +15,7 @@ export class Blog {
   @Column({ nullable: true })
   image: string;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User)
   vendor: User;
 
   @CreateDateColumn({ type: "timestamp" })

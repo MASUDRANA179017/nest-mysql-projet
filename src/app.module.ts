@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
@@ -36,18 +37,37 @@ import { WalletModule } from './wallet/wallet.module';
 import { Blog } from "./entity/blog.entity";
 import { BlogModule } from "./blog/blog.module";
 import { WalletTransaction } from "./entity/wallet-transaction.entity";
+import { VendorOffersModule } from "./vendor-offers/vendor-offers.module";
+import { Area } from "./vendor-offers/entities/area.entity";
+import { City } from "./vendor-offers/entities/city.entity";
+import { FeaturedOffer } from "./vendor-offers/entities/featured-offer.entity";
+import { Festival } from "./vendor-offers/entities/festival.entity";
+import { MerchantSubscription } from "./vendor-offers/entities/merchant-subscription.entity";
+import { Merchant } from "./vendor-offers/entities/merchant.entity";
+import { OfferBookmark } from "./vendor-offers/entities/offer-bookmark.entity";
+import { OfferCategory } from "./vendor-offers/entities/offer-category.entity";
+import { OfferClick } from "./vendor-offers/entities/offer-click.entity";
+import { OfferReport } from "./vendor-offers/entities/offer-report.entity";
+import { OfferTemplate } from "./vendor-offers/entities/offer-template.entity";
+import { Offer } from "./vendor-offers/entities/offer.entity";
+import { VendorAdmin } from "./vendor-offers/entities/vendor-admin.entity";
+import { VisitorSession } from "./vendor-offers/entities/visitor-session.entity";
 
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     TypeOrmModule.forRoot({
       type: "mysql",
-      host: "localhost",
-      port: 3306,
-      username: "root",
-      password: "",
-      database: "nest_ecommerce",
-      entities: [User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction, WalletTransaction, Blog],
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '3306', 10),
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_DATABASE || 'nest_ecommerce_v2',
+      entities: [
+        User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction, WalletTransaction, Blog,
+        Area, City, FeaturedOffer, Festival, MerchantSubscription, Merchant, OfferBookmark, OfferCategory, OfferClick, OfferReport, OfferTemplate, Offer, VendorAdmin, VisitorSession
+      ],
       synchronize: true,
     }),
     AuthModule,
@@ -69,6 +89,7 @@ import { WalletTransaction } from "./entity/wallet-transaction.entity";
     DashboardModule,
     WalletModule,
     BlogModule,
+    VendorOffersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

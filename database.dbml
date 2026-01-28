@@ -1,0 +1,26 @@
+// DBML file for dbdiagram.io and VS Code database visualization extensions
+// Edit this file to keep your database schema in sync with your codebase
+
+// Example for your main tables (add more as needed)
+Table users {
+  id int [pk, increment]
+  name varchar
+  email varchar
+  // ... add other fields
+}
+
+Table products {
+  id int [pk, increment]
+  name varchar
+  price decimal
+  // ... add other fields
+}
+
+Table orders {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  // ... add other fields
+}
+
+// Add all your entities and relations here, following the DBML syntax
+// See: https://dbdiagram.io/docs for full reference
