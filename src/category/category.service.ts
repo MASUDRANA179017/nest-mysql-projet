@@ -23,12 +23,13 @@ export class CategoryService {
             }
         }
         
+        // If you want to associate a store, push it to the stores array
         if (createCategoryDto.storeId) {
             const store = await this.storeRepository.findOne({ where: { id: createCategoryDto.storeId } });
             if (!store) {
                 throw new NotFoundException(`Store with id ${createCategoryDto.storeId} not found`);
             }
-            category.store = store;
+            category.stores = [store];
         }
 
         return this.categoryRepository.save(category);
@@ -38,29 +39,32 @@ export class CategoryService {
     async getAllCategories(): Promise<Category[]> {
         return this.categoryRepository.find({ 
             where: { parent: IsNull() },
-            relations: ['children', 'store'] 
+            relations: ['children', 'stores'] 
         });
     }
 
     async getCategoriesByStore(storeId: number): Promise<Category[]> {
         // Fetch only store specific categories
-        return this.categoryRepository.find({
-            where: { store: { id: storeId }, parent: IsNull() },
-            relations: ['children']
-        });
+        return this.categoryRepository
+            .createQueryBuilder('category')
+            .leftJoinAndSelect('category.children', 'children')
+            .leftJoin('category.stores', 'store')
+            .where('store.id = :storeId', { storeId })
+            .andWhere('category.parent IS NULL')
+            .getMany();
     }
 
     async getCategoriesByType(type: string): Promise<Category[]> {
         return this.categoryRepository.find({
             where: { type, parent: IsNull() },
-            relations: ['children', 'store']
+            relations: ['children', 'stores']
         });
     }
 
     async getCategoryById(id: number): Promise<Category> {
         const category = await this.categoryRepository.findOne({ 
             where: { id },
-            relations: ['children', 'parent', 'store']
+            relations: ['children', 'parent', 'stores']
         });
         if (!category) {
             throw new Error(`Category with id ${id} not found`);
@@ -101,7 +105,7 @@ export class CategoryService {
 
         const category = this.categoryRepository.create({
             ...categoryData,
-            store: store
+            stores: [store]
         });
 
         if (createCategoryDto.parentId) {
@@ -120,12 +124,12 @@ export class CategoryService {
             throw new NotFoundException(`Store for user ${userId} not found`);
         }
 
-        const category = await this.categoryRepository.findOne({ where: { id: categoryId }, relations: ['store'] });
+        const category = await this.categoryRepository.findOne({ where: { id: categoryId }, relations: ['stores'] });
         if (!category) {
             throw new NotFoundException(`Category with id ${categoryId} not found`);
         }
 
-        if (!category.store || category.store.id !== store.id) {
+        if (!category.stores || !category.stores.some(s => s.id === store.id)) {
             throw new NotFoundException(`You do not have permission to update this category`);
         }
 
@@ -162,12 +166,12 @@ export class CategoryService {
             throw new NotFoundException(`Store for user ${userId} not found`);
         }
 
-        const category = await this.categoryRepository.findOne({ where: { id: categoryId }, relations: ['store'] });
+        const category = await this.categoryRepository.findOne({ where: { id: categoryId }, relations: ['stores'] });
         if (!category) {
             throw new NotFoundException(`Category with id ${categoryId} not found`);
         }
 
-        if (!category.store || category.store.id !== store.id) {
+        if (!category.stores || !category.stores.some(s => s.id === store.id)) {
             throw new NotFoundException(`You do not have permission to delete this category`);
         }
 
@@ -182,9 +186,12 @@ export class CategoryService {
             return [];
         }
 
-        return this.categoryRepository.find({
-            where: { store: { id: store.id } },
-            relations: ['children', 'parent']
-        });
+        return this.categoryRepository
+            .createQueryBuilder('category')
+            .leftJoinAndSelect('category.children', 'children')
+            .leftJoinAndSelect('category.parent', 'parent')
+            .leftJoin('category.stores', 'store')
+            .where('store.id = :storeId', { storeId: store.id })
+            .getMany();
     }
 }

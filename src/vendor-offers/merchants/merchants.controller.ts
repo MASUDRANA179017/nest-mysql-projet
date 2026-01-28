@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { MerchantsService } from './merchants.service';
 import { Merchant } from '../entities/merchant.entity';
 
@@ -10,6 +10,14 @@ export class MerchantsController {
 
   @Post()
   @ApiOperation({ summary: 'Create merchant' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Merchant Name',
+        description: 'Merchant description'
+      }
+    }
+  })
   @ApiResponse({ status: 201, description: 'The merchant has been successfully created.', type: Merchant })
   create(@Body() createMerchantDto: any) {
     return this.merchantsService.create(createMerchantDto);
@@ -31,6 +39,14 @@ export class MerchantsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update merchant' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Updated Merchant Name',
+        description: 'Updated merchant description'
+      }
+    }
+  })
   @ApiResponse({ status: 200, description: 'The merchant has been successfully updated.' })
   update(@Param('id') id: string, @Body() updateMerchantDto: any) {
     return this.merchantsService.update(+id, updateMerchantDto);

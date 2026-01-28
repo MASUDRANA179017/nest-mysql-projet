@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 import { StoreService } from './store.service';
 import { JwtAuthGuard } from 'src/jwt-auth.guard';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -15,6 +15,17 @@ export class StoreController {
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create a new store' })
+    @ApiBody({
+        schema: {
+            example: {
+                name: 'My Awesome Store',
+                description: 'This store sells awesome products.',
+                imageUrl: 'https://example.com/store-image.jpg',
+                coverImage: 'https://example.com/store-cover.jpg',
+                address: '123 Main St'
+            }
+        }
+    })
     @ApiResponse({
         status: 201,
         description: 'Store created successfully',
@@ -35,6 +46,18 @@ export class StoreController {
     @ApiResponse({
         status: 200,
         description: 'Returns an array of stores',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    name: 'My Awesome Store',
+                    description: 'This store sells awesome products.',
+                    imageUrl: 'https://example.com/store-image.jpg',
+                    coverImage: 'https://example.com/store-cover.jpg',
+                    address: '123 Main St'
+                }
+            ]
+        }
     })
     @ApiResponse({
         status: 401,
@@ -49,6 +72,18 @@ export class StoreController {
     @ApiResponse({
         status: 200,
         description: 'Returns an array of stores',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    name: 'My Awesome Store',
+                    description: 'This store sells awesome products.',
+                    imageUrl: 'https://example.com/store-image.jpg',
+                    coverImage: 'https://example.com/store-cover.jpg',
+                    address: '123 Main St'
+                }
+            ]
+        }
     })
     async getAllPublicStores() {
         return this.storeService.getAllPublic();
@@ -59,6 +94,16 @@ export class StoreController {
     @ApiResponse({
         status: 200,
         description: 'Returns the store with the specified ID',
+        schema: {
+            example: {
+                id: 1,
+                name: 'My Awesome Store',
+                description: 'This store sells awesome products.',
+                imageUrl: 'https://example.com/store-image.jpg',
+                coverImage: 'https://example.com/store-cover.jpg',
+                address: '123 Main St'
+            }
+        }
     })
     async getPublicStoreById(@Param('id') id: string) {
         return this.storeService.getStoreById(+id);
@@ -109,6 +154,17 @@ export class StoreController {
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update store by ID' })
+    @ApiBody({
+        schema: {
+            example: {
+                name: 'Updated Store Name',
+                description: 'Updated description.',
+                imageUrl: 'https://example.com/updated-store-image.jpg',
+                coverImage: 'https://example.com/updated-store-cover.jpg',
+                address: '456 Updated St'
+            }
+        }
+    })
     @ApiResponse({
         status: 200,
         description: 'Store updated successfully',

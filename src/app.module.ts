@@ -43,7 +43,7 @@ import { City } from "./vendor-offers/entities/city.entity";
 import { FeaturedOffer } from "./vendor-offers/entities/featured-offer.entity";
 import { Festival } from "./vendor-offers/entities/festival.entity";
 import { MerchantSubscription } from "./vendor-offers/entities/merchant-subscription.entity";
-import { Merchant } from "./vendor-offers/entities/merchant.entity";
+import { Merchant } from "./entity/merchant.entity";
 import { OfferBookmark } from "./vendor-offers/entities/offer-bookmark.entity";
 import { OfferCategory } from "./vendor-offers/entities/offer-category.entity";
 import { OfferClick } from "./vendor-offers/entities/offer-click.entity";
@@ -52,6 +52,7 @@ import { OfferTemplate } from "./vendor-offers/entities/offer-template.entity";
 import { Offer } from "./vendor-offers/entities/offer.entity";
 import { VendorAdmin } from "./vendor-offers/entities/vendor-admin.entity";
 import { VisitorSession } from "./vendor-offers/entities/visitor-session.entity";
+import { MerchantPermission } from "./vendor-offers/entities/merchant-permission.entity";
 
 
 @Module({
@@ -66,7 +67,7 @@ import { VisitorSession } from "./vendor-offers/entities/visitor-session.entity"
       database: process.env.DB_DATABASE || 'nest_ecommerce_v2',
       entities: [
         User, Product, Store, Brand, WeightUnit, Review, Category, Coupon, Prescription, Order, OrderItem, Invoice, PosSession, PosTransaction, WalletTransaction, Blog,
-        Area, City, FeaturedOffer, Festival, MerchantSubscription, Merchant, OfferBookmark, OfferCategory, OfferClick, OfferReport, OfferTemplate, Offer, VendorAdmin, VisitorSession
+        Area, City, FeaturedOffer, Festival, MerchantSubscription, Merchant, OfferBookmark, OfferCategory, OfferClick, OfferReport, OfferTemplate, Offer, VendorAdmin, VisitorSession, MerchantPermission
       ],
       synchronize: true,
     }),

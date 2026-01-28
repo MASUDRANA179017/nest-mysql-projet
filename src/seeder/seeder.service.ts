@@ -1,6 +1,9 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from '../entity/category.entity';
+import { Merchant } from '../entity/merchant.entity';
+import { Offer, OfferStatus } from '../vendor-offers/entities/offer.entity';
+import { OfferType } from '../vendor-offers/entities/offer-template.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -8,10 +11,16 @@ export class SeederService implements OnModuleInit {
     constructor(
         @InjectRepository(Category)
         private readonly categoryRepository: Repository<Category>,
+        @InjectRepository(Merchant)
+        private readonly merchantRepository: Repository<Merchant>,
+        @InjectRepository(Offer)
+        private readonly offerRepository: Repository<Offer>,
     ) {}
 
     async onModuleInit() {
         await this.seedCategories();
+        await this.seedMerchants();
+        await this.seedOffers();
     }
 
     private async seedCategories() {
@@ -143,5 +152,53 @@ export class SeederService implements OnModuleInit {
         }
 
         console.log('Categories seeded successfully.');
+    }
+
+    private async seedMerchants() {
+        const merchants = [
+            { name: 'Merchant One', description: 'First merchant' },
+            { name: 'Merchant Two', description: 'Second merchant' },
+        ];
+        for (const m of merchants) {
+            let merchant = await this.merchantRepository.findOne({ where: { name: m.name } });
+            if (!merchant) {
+                merchant = this.merchantRepository.create(m);
+                await this.merchantRepository.save(merchant);
+                console.log(`Created merchant: ${m.name}`);
+            }
+        }
+    }
+
+    private async seedOffers() {
+        const merchant = await this.merchantRepository.findOne({ where: { name: 'Merchant One' } });
+        if (!merchant) return;
+        // Fetch a valid OfferCategory
+        const category = await this.offerRepository.manager.getRepository('OfferCategory').findOne({ where: {} });
+        if (!category) {
+            console.warn('No OfferCategory found. Please seed offer categories first.');
+            return;
+        }
+        const offers = [
+            {
+                merchantId: merchant.id,
+                categoryId: category.id,
+                title: 'Super Sale',
+                description: '50% off everything!',
+                offerType: OfferType.DISCOUNT,
+                startDate: new Date(),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                isVerified: true,
+                isFeatured: false,
+                status: OfferStatus.APPROVED,
+            },
+        ];
+        for (const o of offers) {
+            let offer = await this.offerRepository.findOne({ where: { title: o.title } });
+            if (!offer) {
+                offer = this.offerRepository.create(o);
+                await this.offerRepository.save(offer);
+                console.log(`Created offer: ${o.title}`);
+            }
+        }
     }
 }

@@ -1,26 +1,485 @@
-// DBML file for dbdiagram.io and VS Code database visualization extensions
-// Edit this file to keep your database schema in sync with your codebase
-
-// Example for your main tables (add more as needed)
-Table users {
+Table merchant_permissions {
   id int [pk, increment]
+  merchant_id bigint [ref: > merchants.id]
+
+  module varchar
+  canAccess boolean
+}
+// --- Vendor Offers Module ---
+Table cities {
+  id bigint [pk, increment]
   name varchar
-  email varchar
-  // ... add other fields
+  isActive boolean
 }
 
+Table areas {
+  id bigint [pk, increment]
+  city_id bigint [ref: > cities.id]
+  name varchar
+}
+
+Table festivals {
+  id bigint [pk, increment]
+  name varchar
+  startDate date
+  endDate date
+  isActive boolean
+}
+
+Table offer_categories {
+  id bigint [pk, increment]
+  name varchar
+  icon varchar
+  merchant_id bigint [ref: > merchants.id]
+}
+
+// Merchants: Owns stores, products, prescriptions, blogs, permissions, subscriptions
+Table merchants {
+  id bigint [pk, increment]
+  businessName varchar
+  ownerName varchar
+  phone varchar
+  whatsapp varchar
+  email varchar
+  address text
+  city_id bigint [ref: > cities.id]
+  area_id bigint [ref: > areas.id]
+  trustScore int
+  status varchar
+  // Relations: stores, products, prescriptions, blogs, merchant_permissions, merchant_subscriptions
+}
+
+Table merchant_subscriptions {
+  id bigint [pk, increment]
+  merchant_id bigint [ref: > merchants.id]
+  planName varchar
+  price decimal
+  startDate date
+  endDate date
+  status varchar
+}
+
+Table offer_templates {
+  id bigint [pk, increment]
+  title varchar
+  description text
+  offerType varchar
+}
+
+Table offers {
+  id bigint [pk, increment]
+  merchant_id bigint [ref: > merchants.id]
+  category_id bigint [ref: > offer_categories.id]
+  city_id bigint [ref: > cities.id]
+  area_id bigint [ref: > areas.id]
+  template_id bigint [ref: > offer_templates.id]
+  title varchar
+  description text
+  offerType varchar
+  discountText varchar
+  promoCode varchar
+  startDate datetime
+  endDate datetime
+  banner varchar
+  isVerified boolean
+  isFeatured boolean
+  status varchar
+  createdAt datetime
+}
+
+Table featured_offers {
+  id bigint [pk, increment]
+  offer_id bigint [ref: > offers.id]
+  position varchar
+  startDate date
+  endDate date
+  isPaid boolean
+}
+
+Table offer_bookmarks {
+  id bigint [pk, increment]
+  offer_id bigint [ref: > offers.id]
+  sessionId varchar
+  createdAt datetime
+}
+
+Table offer_clicks {
+  id bigint [pk, increment]
+  offer_id bigint [ref: > offers.id]
+  source varchar
+  clickedAt timestamp
+}
+
+Table offer_reports {
+  id bigint [pk, increment]
+  offer_id bigint [ref: > offers.id]
+  reason text
+  reportedBy varchar
+  status varchar
+  createdAt datetime
+}
+
+Table vendor_admins {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [unique]
+  password varchar
+  role varchar
+  createdAt datetime
+}
+
+Table visitor_sessions {
+  id bigint [pk, increment]
+  sessionId varchar
+  city_id bigint [ref: > cities.id]
+  area_id bigint [ref: > areas.id]
+  device varchar
+  createdAt datetime
+}
+// DBML for your full system, generated from TypeORM entities
+
+Table users {
+  id int [pk, increment]
+  email varchar [unique]
+  password varchar
+  firstName varchar
+  lastName varchar
+  username varchar
+  isActive boolean
+  role varchar
+  walletBalance decimal
+  referredByVendorId int
+  refreshToken varchar
+  profileImage varchar
+  walletPoints int
+}
+
+// Stores: Belongs to merchant, has products, prescriptions, coupons, invoices, pos_sessions
+Table stores {
+  id int [pk, increment]
+  name varchar [unique]
+  description varchar
+  imageUrl varchar
+  coverImage varchar
+  address varchar
+  city varchar
+  smtpHost varchar
+  smtpPort int
+  smtpUser varchar
+  smtpPass varchar
+  smtpSecure boolean
+  smtpFrom varchar
+  owner_id int [ref: > users.id]
+  category_id int [ref: > categories.id]
+  merchant_id bigint [ref: > merchants.id]
+  createdAt datetime
+  // Relations: products, prescriptions, coupons, invoices, pos_sessions
+}
+
+// Products: Belongs to merchant, store, category, brand, weight_unit; has reviews, coupons, prescriptions, order_items
 Table products {
   id int [pk, increment]
-  name varchar
+  name varchar [unique]
+  description varchar
   price decimal
-  // ... add other fields
+  stock int
+  manufactureDate datetime
+  expireDate datetime
+  isService boolean
+  isAvailable boolean
+  schedule text
+  barcode varchar
+  productThumbnail varchar
+  productGallery text
+  vendor_id int [ref: > users.id]
+  store_id int [ref: > stores.id]
+  weightUnit_id int [ref: > weight_units.id]
+  category_id int [ref: > categories.id]
+  brand_id int [ref: > brands.id]
+  merchant_id bigint [ref: > merchants.id]
+  // Relations: reviews, coupon_products, prescription_products, order_items
+}
+
+Table categories {
+  id int [pk, increment]
+  name varchar
+  description varchar
+  type varchar
+  parent_id int [ref: > categories.id]
+  store_id int [ref: > stores.id]
+}
+
+Table brands {
+  id int [pk, increment]
+  name varchar
+  description varchar
+  brandThumbnail varchar
+}
+
+Table weight_units {
+  id int [pk, increment]
+  name varchar
+  description varchar
 }
 
 Table orders {
   id int [pk, increment]
   user_id int [ref: > users.id]
-  // ... add other fields
+  totalAmount decimal
+  customerName varchar
+  customerPhone varchar
+  notes varchar
+  shippingAddress varchar
+  status varchar
+  createdAt datetime
 }
 
-// Add all your entities and relations here, following the DBML syntax
-// See: https://dbdiagram.io/docs for full reference
+Table order_items {
+  id int [pk, increment]
+  productId int [ref: > products.id]
+  order_id int [ref: > orders.id]
+  quantity int
+  totalPrice decimal
+  serviceDate datetime
+}
+
+Table reviews {
+  id int [pk, increment]
+  rating int
+  comment varchar
+  user_id int [ref: > users.id]
+  product_id int [ref: > products.id]
+  createdAt datetime
+}
+
+Table coupons {
+  id int [pk, increment]
+  code varchar
+  discountType varchar
+  discountValue decimal
+  scope varchar
+  store_id int [ref: > stores.id]
+  expiresAt datetime
+  createdAt datetime
+}
+
+Table coupon_products {
+  coupon_id int [ref: > coupons.id, pk]
+  product_id int [ref: > products.id, pk]
+}
+
+Table coupon_categories {
+  coupon_id int [ref: > coupons.id, pk]
+  category_id int [ref: > categories.id, pk]
+}
+
+Table wallet_transactions {
+  id int [pk, increment]
+  amount decimal
+  type varchar
+  description varchar
+  createdAt datetime
+  user_id int [ref: > users.id]
+}
+
+// Prescriptions: Belongs to merchant, store, owner; has prescription_products
+Table prescriptions {
+  id int [pk, increment]
+  title varchar
+  description varchar
+  note varchar
+  advice varchar
+  visitingDate datetime
+  nextVisitingDate datetime
+  store_id int [ref: > stores.id]
+  owner_id int [ref: > users.id]
+  merchant_id bigint [ref: > merchants.id]
+  // Relations: prescription_products
+}
+
+Table prescription_products {
+  prescription_id int [ref: > prescriptions.id, pk]
+  product_id int [ref: > products.id, pk]
+}
+
+Table invoices {
+  id int [pk, increment]
+  invoiceNumber varchar [unique]
+  customer_id int [ref: > users.id]
+  store_id int [ref: > stores.id]
+  order_id int [ref: > orders.id]
+  subtotal decimal
+  taxAmount decimal
+  discountAmount decimal
+  totalAmount decimal
+  status varchar
+  notes varchar
+  dueDate datetime
+  paidAt datetime
+  createdAt datetime
+}
+
+Table blogs {
+  id int [pk, increment]
+  title varchar
+  content text
+  image varchar
+  vendor_id int [ref: > users.id]
+  merchant_id bigint [ref: > merchants.id]
+  createdAt datetime
+  updatedAt datetime
+}
+
+Table pos_sessions {
+  id int [pk, increment]
+  store_id int [ref: > stores.id]
+  cashier_id int [ref: > users.id]
+  openingBalance decimal
+  closingBalance decimal
+  totalSales decimal
+  totalCashSales decimal
+  totalCardSales decimal
+  transactionCount int
+  status varchar
+  closingNotes varchar
+  openedAt datetime
+  closedAt datetime
+}
+
+Table pos_transactions {
+  id int [pk, increment]
+  transactionNumber varchar [unique]
+  store_id int [ref: > stores.id]
+  cashier_id int [ref: > users.id]
+  customer_id int [ref: > users.id]
+  session_id int [ref: > pos_sessions.id]
+  items text
+  subtotal decimal
+  taxAmount decimal
+  discountAmount decimal
+  totalAmount decimal
+  paymentMethod varchar
+  amountPaid decimal
+}
+
+// --- Universal Service Modules ---
+
+// Payment Transactions: Linked to user and order
+Table payment_transactions {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  order_id int [ref: > orders.id]
+  amount decimal
+  method varchar
+  status varchar
+  transaction_ref varchar
+  createdAt datetime
+  // Relations: users, orders
+}
+
+// Notifications: Linked to user
+Table notifications {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  type varchar
+  message text
+  status varchar
+  sentAt datetime
+  // Relations: users
+}
+
+// Inventory Logs: Linked to product
+Table inventory_logs {
+  id int [pk, increment]
+  product_id int [ref: > products.id]
+  change int
+  reason varchar
+  createdAt datetime
+  // Relations: products
+}
+
+// Support Tickets: Linked to user, has ticket_messages
+Table support_tickets {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  subject varchar
+  description text
+  status varchar
+  createdAt datetime
+  closedAt datetime
+  // Relations: users, ticket_messages
+}
+
+// Ticket Messages: Linked to support_ticket and sender (user)
+Table ticket_messages {
+  id int [pk, increment]
+  ticket_id int [ref: > support_tickets.id]
+  sender_id int [ref: > users.id]
+  message text
+  sentAt datetime
+  // Relations: support_tickets, users
+}
+
+// Analytics Reports: Standalone, can be linked to business modules
+Table analytics_reports {
+  id int [pk, increment]
+  type varchar
+  data text
+  generatedAt datetime
+}
+
+// Loyalty Points: Linked to user
+Table loyalty_points {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  points int
+  reason varchar
+  createdAt datetime
+  // Relations: users
+}
+
+// Subscriptions: Linked to user
+Table subscriptions {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  plan varchar
+  price decimal
+  startDate datetime
+  endDate datetime
+  status varchar
+  // Relations: users
+}
+
+// Deliveries: Linked to order
+Table deliveries {
+  id int [pk, increment]
+  order_id int [ref: > orders.id]
+  delivery_status varchar
+  tracking_number varchar
+  shippedAt datetime
+  deliveredAt datetime
+  // Relations: orders
+}
+
+// Bookings: Linked to user
+Table bookings {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  service varchar
+  booking_date datetime
+  status varchar
+  createdAt datetime
+  // Relations: users
+}
+
+// Feedbacks: Linked to user, can target any entity
+Table feedbacks {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  type varchar
+  target_id int
+  comment text
+  rating int
+  createdAt datetime
+  // Relations: users
+}

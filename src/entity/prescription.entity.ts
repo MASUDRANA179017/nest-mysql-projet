@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTabl
 import { User } from './user.entity';
 import { Product } from './product.entity';
 import { Store } from './store.entity';
+import { Merchant } from './merchant.entity';
 
 @Entity()
 export class Prescription {
@@ -32,7 +33,12 @@ export class Prescription {
     @ManyToOne(() => User, (user) => user.prescription)
     owner: User;
 
+
     @ManyToMany(() => Product, (product)=> product.prescription)
     @JoinTable() 
     products: Product[];
+
+    // Relations
+    @ManyToOne(() => Merchant, { nullable: false })
+    merchant: Merchant;
 }

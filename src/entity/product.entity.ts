@@ -1,4 +1,3 @@
-
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, ManyToMany } from "typeorm";
 import { User } from "./user.entity";
 import { Store } from "./store.entity";
@@ -8,6 +7,7 @@ import { Brand } from "./brand.entity";
 import { WeightUnit } from "./weight-unit.entity";
 import { Prescription } from "./prescription.entity";
 import { Coupon } from "./coupon.entity";
+import { Merchant } from './merchant.entity';
 
 @Entity()
 export class Product {
@@ -72,8 +72,11 @@ export class Product {
     @ManyToMany(() => Prescription, (prescription) => prescription.products)
     prescription: Prescription[];
     
+
     @OneToMany(() => Review, (review) => review.product)
     reviews: Review[];
 
-
+    // Relations
+    @ManyToOne(() => Merchant, { nullable: false })
+    merchant: Merchant;
 }

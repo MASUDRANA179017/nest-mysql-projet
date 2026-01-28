@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards, ParseIntPipe } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../jwt-auth.guard";
 import { BlogService } from "./blog.service";
 import { CreateBlogDto } from "./dto/create-blog.dto";
@@ -29,6 +29,15 @@ export class BlogController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Create blog" })
+  @ApiBody({
+    schema: {
+      example: {
+        title: 'My First Blog',
+        content: 'This is the content of the blog.',
+        image: 'https://example.com/image.jpg'
+      }
+    }
+  })
   @ApiResponse({ status: 201 })
   async create(@Body() dto: CreateBlogDto, @Request() req: any) {
     return this.blogService.create(dto, req.user.id);
@@ -45,6 +54,15 @@ export class BlogController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Update blog" })
+  @ApiBody({
+    schema: {
+      example: {
+        title: 'Updated Blog Title',
+        content: 'Updated content.',
+        image: 'https://example.com/updated-image.jpg'
+      }
+    }
+  })
   @ApiResponse({ status: 200 })
   async update(@Param("id") id: string, @Body() dto: UpdateBlogDto, @Request() req: any) {
     return this.blogService.update(+id, dto, req.user.id);

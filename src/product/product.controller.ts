@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards, Query } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody } from "@nestjs/swagger";
 import { ProductService } from "./product.service";
 import { JwtAuthGuard } from "src/jwt-auth.guard";
 import { CreateProductDto } from "./dto/crate-product.dto";
@@ -15,6 +15,19 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Create a new product" })
+  @ApiBody({
+    schema: {
+      example: {
+        name: "Laptop",
+        description: "A high-performance laptop",
+        price: 999,
+        stock: 100,
+        barcode: "123456789",
+        manufactureDate: "2024-01-15",
+        expireDate: "2026-01-15"
+      }
+    }
+  })
   @ApiResponse({
     status: 201,
     description: "Product created successfully",
@@ -42,6 +55,20 @@ export class ProductController {
   @ApiResponse({
     status: 200,
     description: "Products retrieved successfully",
+    schema: {
+      example: [
+        {
+          id: 1,
+          name: "Laptop",
+          description: "A high-performance laptop",
+          price: 999,
+          stock: 100,
+          barcode: "123456789",
+          manufactureDate: "2024-01-15",
+          expireDate: "2026-01-15"
+        }
+      ]
+    }
   })
   @ApiResponse({
     status: 403,
@@ -146,6 +173,19 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Update product by ID" })
+  @ApiBody({
+    schema: {
+      example: {
+        name: "Updated Laptop",
+        description: "Updated description.",
+        price: 1099,
+        stock: 80,
+        barcode: "987654321",
+        manufactureDate: "2024-02-01",
+        expireDate: "2027-02-01"
+      }
+    }
+  })
   @ApiResponse({
     status: 200,
     description: "Product updated successfully",

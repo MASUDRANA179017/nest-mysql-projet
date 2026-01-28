@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { OffersService } from './offers.service';
 import { Offer } from '../entities/offer.entity';
 
@@ -10,6 +10,28 @@ export class OffersController {
 
   @Post()
   @ApiOperation({ summary: 'Create offer' })
+  @ApiBody({
+    schema: {
+      example: {
+        merchantId: 1,
+        categoryId: 1,
+        cityId: 1,
+        areaId: 1,
+        templateId: 1,
+        title: 'Super Sale',
+        description: '50% off everything!',
+        offerType: 'discount',
+        discountText: '50% OFF',
+        promoCode: 'SALE50',
+        startDate: '2026-01-29T00:00:00Z',
+        endDate: '2026-02-05T00:00:00Z',
+        banner: 'banner.jpg',
+        isVerified: true,
+        isFeatured: false,
+        status: 'approved'
+      }
+    }
+  })
   @ApiResponse({ status: 201, description: 'The offer has been successfully created.', type: Offer })
   create(@Body() createOfferDto: any) {
     return this.offersService.create(createOfferDto);
@@ -31,6 +53,23 @@ export class OffersController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update offer' })
+  @ApiBody({
+    schema: {
+      example: {
+        title: 'Super Sale Updated',
+        description: '60% off everything!',
+        offerType: 'discount',
+        discountText: '60% OFF',
+        promoCode: 'SALE60',
+        startDate: '2026-01-30T00:00:00Z',
+        endDate: '2026-02-06T00:00:00Z',
+        banner: 'banner2.jpg',
+        isVerified: true,
+        isFeatured: true,
+        status: 'approved'
+      }
+    }
+  })
   @ApiResponse({ status: 200, description: 'The offer has been successfully updated.' })
   update(@Param('id') id: string, @Body() updateOfferDto: any) {
     return this.offersService.update(+id, updateOfferDto);
