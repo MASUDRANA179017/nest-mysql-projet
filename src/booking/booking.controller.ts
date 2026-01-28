@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
@@ -25,6 +25,17 @@ export class BookingController {
   @Post()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create booking' })
+  @ApiBody({
+    schema: {
+      example: {
+        userId: 1,
+        service: 'Room Cleaning',
+        bookingDate: '2026-01-29T10:00:00Z',
+        status: 'pending',
+        createdAt: '2026-01-29T09:00:00Z'
+      }
+    }
+  })
   @ApiResponse({ status: 201 })
   create(@Body() dto: CreateBookingDto) {
     return this.bookingService.create(dto);
@@ -33,6 +44,17 @@ export class BookingController {
   @Put(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update booking' })
+  @ApiBody({
+    schema: {
+      example: {
+        userId: 1,
+        service: 'Room Cleaning',
+        bookingDate: '2026-01-29T10:00:00Z',
+        status: 'confirmed',
+        createdAt: '2026-01-29T09:00:00Z'
+      }
+    }
+  })
   @ApiResponse({ status: 200 })
   update(@Param('id') id: number, @Body() dto: CreateBookingDto) {
     return this.bookingService.update(id, dto);

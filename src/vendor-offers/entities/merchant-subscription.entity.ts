@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Merchant } from '../../entity/merchant.entity';
+import { Merchant } from './merchant.entity';
 
 export enum SubscriptionStatus {
   ACTIVE = 'active',

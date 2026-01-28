@@ -3,6 +3,7 @@ import { WalletService } from './wallet.service';
 import { DepositDto } from './dto/deposit.dto';
 import { JwtAuthGuard } from '../jwt-auth.guard';
 import { WithdrawDto } from './dto/withdraw.dto';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('wallet')
 @UseGuards(JwtAuthGuard)
@@ -20,11 +21,27 @@ export class WalletController {
     }
 
     @Post('deposit')
+    @ApiBody({
+        schema: {
+            example: {
+                amount: 100,
+                description: 'Deposit to wallet'
+            }
+        }
+    })
     async deposit(@Request() req, @Body() depositDto: DepositDto) {
         return await this.walletService.deposit(req.user.id, depositDto);
     }
 
     @Post('withdraw/request')
+    @ApiBody({
+        schema: {
+            example: {
+                amount: 50,
+                description: 'Withdraw to bank'
+            }
+        }
+    })
     async requestWithdraw(@Request() req, @Body() withdrawDto: WithdrawDto) {
         return await this.walletService.requestWithdraw(req.user.id, withdrawDto);
     }

@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Merchant } from '../../entity/merchant.entity';
+import { Merchant } from './merchant.entity';
 import { OfferCategory } from './offer-category.entity';
 import { City } from './city.entity';
 import { Area } from './area.entity';

@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from "./user.entity";
-import { Merchant } from './merchant.entity';
+import { Merchant } from '../vendor-offers/entities/merchant.entity';
 
 @Entity()
 export class Blog {

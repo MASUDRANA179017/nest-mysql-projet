@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AreasService } from './areas.service';
 import { Area } from '../entities/area.entity';
 
@@ -10,6 +10,15 @@ export class AreasController {
 
   @Post()
   @ApiOperation({ summary: 'Create area' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Banani',
+        cityId: 1,
+        isActive: true
+      }
+    }
+  })
   @ApiResponse({ status: 201, description: 'The area has been successfully created.', type: Area })
   create(@Body() createAreaDto: any) {
     return this.areasService.create(createAreaDto);
@@ -31,6 +40,15 @@ export class AreasController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update area' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Banani Updated',
+        cityId: 1,
+        isActive: false
+      }
+    }
+  })
   @ApiResponse({ status: 200, description: 'The area has been successfully updated.' })
   update(@Param('id') id: string, @Body() updateAreaDto: any) {
     return this.areasService.update(+id, updateAreaDto);

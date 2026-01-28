@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Offer } from './offer.entity';
-import { Merchant } from '../../entity/merchant.entity';
+import { Merchant } from './merchant.entity';
 
 @Entity('offer_categories')
 export class OfferCategory {

@@ -13,8 +13,16 @@ export class MerchantsController {
   @ApiBody({
     schema: {
       example: {
-        name: 'Merchant Name',
-        description: 'Merchant description'
+        businessName: 'Tech Store',
+        ownerName: 'Jane Doe',
+        phone: '+1234567890',
+        whatsapp: '+1234567890',
+        email: 'merchant@example.com',
+        address: '123 Main St',
+        cityId: 1,
+        areaId: 1,
+        trustScore: 100,
+        status: 'pending'
       }
     }
   })
@@ -42,8 +50,16 @@ export class MerchantsController {
   @ApiBody({
     schema: {
       example: {
-        name: 'Updated Merchant Name',
-        description: 'Updated merchant description'
+        businessName: 'Updated Tech Store',
+        ownerName: 'John Smith',
+        phone: '+1987654321',
+        whatsapp: '+1987654321',
+        email: 'updated@example.com',
+        address: '456 New Ave',
+        cityId: 2,
+        areaId: 2,
+        trustScore: 80,
+        status: 'approved'
       }
     }
   })

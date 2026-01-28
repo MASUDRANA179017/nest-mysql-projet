@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTabl
 import { User } from './user.entity';
 import { Product } from './product.entity';
 import { Store } from './store.entity';
-import { Merchant } from './merchant.entity';
+import { Merchant } from '../vendor-offers/entities/merchant.entity';
 
 @Entity()
 export class Prescription {

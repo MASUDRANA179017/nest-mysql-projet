@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/jwt-auth.guard';
 import { WeightUnitService } from './weight-unit.service';
 import { CreateWeightUnitDto } from './dto/create-weight-unit.dto';
@@ -14,6 +14,14 @@ export class WeightUnitController {
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create a new weight unit' })
+    @ApiBody({
+        schema: {
+            example: {
+                name: 'Kilogram',
+                description: 'Used for heavy products'
+            }
+        }
+    })
     @ApiResponse({ status: 201, description: 'Weight unit created successfully' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -49,6 +57,14 @@ export class WeightUnitController {
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update an existing weight unit' })
+    @ApiBody({
+        schema: {
+            example: {
+                name: 'Gram',
+                description: 'Used for small products'
+            }
+        }
+    })
     @ApiResponse({ status: 200, description: 'Weight unit updated successfully' })
     @ApiResponse({ status: 404, description: 'Weight unit not found' })
     @ApiResponse({ status: 403, description: 'Forbidden' })

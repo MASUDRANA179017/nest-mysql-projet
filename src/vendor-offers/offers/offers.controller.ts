@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { OffersService } from './offers.service';
 import { Offer } from '../entities/offer.entity';
 
+// DTOs would ideally be imported here if available
+
 @ApiTags('offers')
 @Controller('vendor-offers/offers')
 export class OffersController {
@@ -11,6 +13,7 @@ export class OffersController {
   @Post()
   @ApiOperation({ summary: 'Create offer' })
   @ApiBody({
+    // type: CreateOfferDto, // Uncomment if DTO exists
     schema: {
       example: {
         merchantId: 1,
@@ -54,6 +57,7 @@ export class OffersController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update offer' })
   @ApiBody({
+    // type: UpdateOfferDto, // Uncomment if DTO exists
     schema: {
       example: {
         title: 'Super Sale Updated',

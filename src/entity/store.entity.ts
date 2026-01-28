@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 import { User } from "./user.entity";
 import { Coupon } from "./coupon.entity";
 import { Prescription } from "./prescription.entity";
-import { Merchant } from './merchant.entity';
+import { Merchant } from '../vendor-offers/entities/merchant.entity';
 import { Category } from "./category.entity";
 import { ApiProperty } from '@nestjs/swagger';
 

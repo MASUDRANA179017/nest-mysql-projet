@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { CitiesService } from './cities.service';
 import { City } from '../entities/city.entity';
 
@@ -10,6 +10,14 @@ export class CitiesController {
 
   @Post()
   @ApiOperation({ summary: 'Create city' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Dhaka',
+        isActive: true
+      }
+    }
+  })
   @ApiResponse({ status: 201, description: 'The city has been successfully created.', type: City })
   create(@Body() createCityDto: any) {
     return this.citiesService.create(createCityDto);
@@ -31,6 +39,14 @@ export class CitiesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update city' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Dhaka Updated',
+        isActive: false
+      }
+    }
+  })
   @ApiResponse({ status: 200, description: 'The city has been successfully updated.' })
   update(@Param('id') id: string, @Body() updateCityDto: any) {
     return this.citiesService.update(+id, updateCityDto);

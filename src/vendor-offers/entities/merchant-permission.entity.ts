@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Merchant } from '../../entity/merchant.entity';
+import { Merchant } from './merchant.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('merchant_permissions')

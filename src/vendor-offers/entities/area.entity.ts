@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { City } from './city.entity';
-import { Merchant } from '../../entity/merchant.entity';
+import { Merchant } from './merchant.entity';
 import { Offer } from './offer.entity';
 import { VisitorSession } from './visitor-session.entity';
 

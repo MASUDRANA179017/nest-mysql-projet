@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AdminsService } from './admins.service';
 import { VendorAdmin } from '../entities/vendor-admin.entity';
 
@@ -10,6 +10,16 @@ export class AdminsController {
 
   @Post()
   @ApiOperation({ summary: 'Create admin' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Admin Name',
+        email: 'admin@example.com',
+        password: 'admin123',
+        role: 'SUPER'
+      }
+    }
+  })
   @ApiResponse({ status: 201, description: 'The admin has been successfully created.', type: VendorAdmin })
   create(@Body() createAdminDto: any) {
     return this.adminsService.create(createAdminDto);
@@ -31,6 +41,16 @@ export class AdminsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update admin' })
+  @ApiBody({
+    schema: {
+      example: {
+        name: 'Admin Name Updated',
+        email: 'admin@example.com',
+        password: 'admin123',
+        role: 'SUPER'
+      }
+    }
+  })
   @ApiResponse({ status: 200, description: 'The admin has been successfully updated.' })
   update(@Param('id') id: string, @Body() updateAdminDto: any) {
     return this.adminsService.update(+id, updateAdminDto);

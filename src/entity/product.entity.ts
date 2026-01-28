@@ -7,7 +7,7 @@ import { Brand } from "./brand.entity";
 import { WeightUnit } from "./weight-unit.entity";
 import { Prescription } from "./prescription.entity";
 import { Coupon } from "./coupon.entity";
-import { Merchant } from './merchant.entity';
+import { Merchant } from '../vendor-offers/entities/merchant.entity';
 
 @Entity()
 export class Product {
