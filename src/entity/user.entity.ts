@@ -22,7 +22,7 @@ export class User {
     @Column({ default: false })
     isActive: boolean;
     @Column({ type: 'varchar', default: 'user' })
-    role: 'admin' | 'vendor' | 'user';
+    role: 'super' | 'admin' | 'vendor' | 'user';
 
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
     walletBalance: number;

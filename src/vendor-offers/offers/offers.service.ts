@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Offer } from '../entities/offer.entity';
@@ -10,8 +10,19 @@ export class OffersService {
     private offersRepository: Repository<Offer>,
   ) {}
 
-  create(createOfferDto: any) {
-    return this.offersRepository.save(createOfferDto);
+  async create(createOfferDto: any) {
+    try {
+      return await this.offersRepository.save(createOfferDto);
+    } catch (error) {
+      if (
+        error.code === 'ER_NO_REFERENCED_ROW_2' &&
+        error.sqlMessage &&
+        error.sqlMessage.includes('`merchant_id`')
+      ) {
+        throw new BadRequestException('Use a valid existing merchant_id when creating the offer.');
+      }
+      throw error;
+    }
   }
 
   findAll() {

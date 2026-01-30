@@ -10,13 +10,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(@InjectRepository(User) private userRepository: Repository<User>) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: "my_jwt_secret",
+      secretOrKey: process.env.JWT_SECRET || 'your_jwt_secret_key',
     });
   }
 
   async validate(payload: { sub: string }) {
+    console.log('JWT payload:', payload);
     const user = await this.userRepository.findOne({ where: { id: Number(payload.sub) } });
+    console.log('User found for JWT:', user);
     if (!user) {
+      console.log('No user found for JWT payload:', payload);
       throw new UnauthorizedException();
     }
     return user;

@@ -34,7 +34,7 @@ export class AuthService {
       firstName: firstName,
       lastName: lastName,
       profileImage: profileImage,
-      role: role as 'admin' | 'vendor' | 'user',
+      role: role as 'super' | 'admin' | 'vendor' | 'user',
       refreshToken: uuidv4(),
     });
     await this.userRepository.save(user);
@@ -98,7 +98,7 @@ export class AuthService {
     };
     return {
       access_Token: this.jwtService.sign(payload),
-      refresh_Token: user.refreshToken,
+      refresh_Token: this.jwtService.sign(payload, { expiresIn: '7d' }),
       user: {
         email: user.email,
         firstName: user.firstName,

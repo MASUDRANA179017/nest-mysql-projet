@@ -18,7 +18,12 @@ export class ModuleAccessGuard implements CanActivate {
     if (!module) return true;
     const req = context.switchToHttp().getRequest();
     const user = req.user;
-    if (!user || !user.merchantId) throw new ForbiddenException('No merchant context');
+    if (!user) throw new ForbiddenException('No user context');
+    // Allow super admin to access all modules
+    if (user.role === 'super' || user.role === 'SUPER') {
+      return true;
+    }
+    if (!user.merchantId) throw new ForbiddenException('No merchant context');
     const perm = await this.permissionRepo.findOneBy({ merchantId: user.merchantId, module, canAccess: true });
     if (!perm) throw new ForbiddenException('No access to this module');
     return true;
